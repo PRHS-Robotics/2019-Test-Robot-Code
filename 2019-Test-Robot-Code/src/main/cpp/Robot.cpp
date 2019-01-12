@@ -151,13 +151,6 @@ void Robot::TeleopInit() {
 	else {
 		std::cout << "Failed to establish communication with Arduino\n";
 	}
-
-	//m_calculation->join();
-
-
-	for (auto& point : pathresult.first) {
-		std::cout << "Time: " << point.dt << "\n";
-	}	
 }
 
 void Robot::TeleopPeriodic() {
