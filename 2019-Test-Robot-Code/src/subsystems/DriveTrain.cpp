@@ -58,7 +58,6 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		setRightSidePhase(rightSidePhase());
 		std::cout << "Setting default right side phase\n";
 		setRightSidePhase(false);
-
 	}
 
 	m_midLeft.Follow(m_frontLeft);
@@ -81,10 +80,6 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_frontLeft.Config_kP(0, 17.05, 10);
 	m_frontLeft.Config_kI(0, 0, 10);
 	m_frontLeft.Config_kD(0, 0, 10);
-	/*m_frontLeft.Config_kF(0, 6.434, 10);
-	m_frontLeft.Config_kP(0, 6.82 * 1.5, 10);
-	m_frontLeft.Config_kI(0, 6.82 * 2.0 / 100.0, 10);
-	m_frontLeft.Config_kD(0, 0, 10);*/
 	m_frontLeft.ConfigClosedloopRamp(0.0, 10);
 
 	m_frontRight.ConfigNominalOutputForward(0, 10);
@@ -97,16 +92,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_frontRight.Config_kP(0, 17.05, 10);
 	m_frontRight.Config_kI(0, 0, 10);
 	m_frontRight.Config_kD(0, 0, 10);
-	/*m_frontRight.Config_kF(0, 6.434, 10);
-	m_frontRight.Config_kP(0, 6.82 * 1.5, 10);
-	m_frontRight.Config_kI(0, 6.82 * 2.0 / 100.0, 10);
-	m_frontRight.Config_kD(0, 0, 10);*/
 	m_frontRight.ConfigClosedloopRamp(0.0, 10);
-
-	//m_frontLeft.SelectProfileSlot(0, 0);
-	//m_drive.SetMaxOutput(159);
-
-	//m_frontLeft.GetSensorCollection().ConfigEncoderCodesPerRev(96.0);
 }
 
 void DriveTrain::resetSensors() {
@@ -117,33 +103,13 @@ void DriveTrain::resetSensors() {
 bool percent = false;
 
 void DriveTrain::drive(InputState state) {
-	//static long lastPosition = -999;
-	//long position = m_frontLeft.GetSensorCollection().GetQuadraturePosition();
-
-	/*if (position != lastPosition) {
-		lastPosition = position;
-		std::cout << position << "\n";
-	}*/
-
 	double lSpeed = -state.y + state.r;
 	double rSpeed = -state.y - state.r;
 	lSpeed = std::max(std::min(lSpeed, 1.0), -1.0);
 	rSpeed = std::max(std::min(rSpeed, 1.0), -1.0);
-	//m_drive.TankDrive(-lSpeed, -rSpeed, false)
 
 	m_shiftFast.Set(buttonValue(state, "SHIFT_FAST"));
 	m_shiftSlow.Set(buttonValue(state, "SHIFT_SLOW"));
-
-	/*if (state.trigger) {
-		m_frontLeft.Set(ControlMode::PercentOutput, lSpeed);
-	}
-	else {
-		if (lSpeed != 0 || m_frontLeft.GetClosedLoopError(0) != 0) {
-			std::cout << "Error: " << m_frontLeft.GetClosedLoopError(0) << ", Setpoint: " << lSpeed * 100 << "\n";
-		}
-		m_frontLeft.Set(ControlMode::Velocity, lSpeed * 100);
-	}*/
-	//m_arm.Set(rSpeed * 0.10);
 
 	percent = buttonValue(state, "TRIGGER");
 
@@ -192,9 +158,6 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 	frc::SmartDashboard::PutNumber("Right Side Error", rightSpeed * 60 - m_frontRight.GetSelectedSensorVelocity(0));
 
 	calibratePhase(leftSpeed, rightSpeed);
-
-	/*m_frontLeft.Set(ControlMode::PercentOutput, leftSpeed);
-	m_frontRight.Set(ControlMode::PercentOutput, rightSpeed);*/
 
 	if (percent) {
 		m_frontLeft.Set(ControlMode::PercentOutput, leftSpeed);

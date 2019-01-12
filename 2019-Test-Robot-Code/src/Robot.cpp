@@ -101,46 +101,10 @@ void Robot::TeleopInit() {
 }
 
 void Robot::TeleopPeriodic() {
-	/*InputState raw = m_input->getRawInput();
-	std::cout << raw.x << ", " << raw.y << ", " << raw.r << "\n";
-
-	std::cout << applyDeadzone(-0.01, 0.3) << "\n";*/
-
-	/*m_serialPort->Write("testmessage");
-
-	char buffer[256] = { 0 };
-	std::cout << "Read " << m_serialPort->Read((char*)buffer, 255) << " bytes\n";
-	std::cout << "Result: " << buffer << "\n";*/
-
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
 
-	/*if (m_input->getInput().buttons[1]) {
-		m_driveTrain->drive(InputState{ 0.0, -(forward * 2 - 1), 0.0 });
-	}
-	else {
-		m_driveTrain->drive(InputState{ 0.0, 0.0, 0.0 });
-	}*/
-
 	m_driveTrain->drive(m_input->getInput());
-
-	// TODO: Fix
-	/**/
-
-	// 3.312
-	// 1.373
-
-	// 3.044
-	// 2.883
-
-	static bool forward = true;
-
-	if (m_analogInput->GetAverageVoltage() >= frc::SmartDashboard::GetNumber("Forward Limit", 3.0)) {
-		forward = false;
-	}
-	if (m_analogInput->GetAverageVoltage() <= frc::SmartDashboard::GetNumber("Reverse Limit", 2.883)) {
-		forward = true;
-	}
 }
 
 void Robot::TestPeriodic() {}
