@@ -66,33 +66,26 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_midRight.Follow(m_frontRight);
 	m_backRight.Follow(m_frontRight);
 
-	m_frontLeft.ConfigNominalOutputForward(0, 10);
-	m_frontLeft.ConfigNominalOutputReverse(0, 10);
-	m_frontLeft.ConfigPeakOutputForward(1, 10);
-	m_frontLeft.ConfigPeakOutputReverse(-1, 10);
-
 	m_frontLeft.SetInverted(true);
 	m_midLeft.SetInverted(true);
 	m_backLeft.SetInverted(true);
 
-	m_frontLeft.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
-	m_frontLeft.Config_kF(0, 15.57, 10);
-	m_frontLeft.Config_kP(0, 17.05, 10);
-	m_frontLeft.Config_kI(0, 0, 10);
-	m_frontLeft.Config_kD(0, 0, 10);
-	m_frontLeft.ConfigClosedloopRamp(0.0, 10);
+	// Configure both front left and front right talons identically
+	WPI_TalonSRX *talon = m_frontLeft;
+	std::array< WPI_TalonSRX*, 2 > talons = { m_frontLeft, m_frontRight };
+	for (int i = 0; i < 2; ++i) {
+		talons[i]->ConfigNominalOutputForward(0, 10);
+		talons[i]->ConfigNominalOutputReverse(0, 10);
+		talons[i]->ConfigPeakOutputForward(1, 10);
+		talons[i]->ConfigPeakOutputReverse(-1, 10);
 
-	m_frontRight.ConfigNominalOutputForward(0, 10);
-	m_frontRight.ConfigNominalOutputReverse(0, 10);
-	m_frontRight.ConfigPeakOutputForward(1, 10);
-	m_frontRight.ConfigPeakOutputReverse(-1, 10);
-
-	m_frontRight.ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
-	m_frontRight.Config_kF(0, 15.57, 10);
-	m_frontRight.Config_kP(0, 17.05, 10);
-	m_frontRight.Config_kI(0, 0, 10);
-	m_frontRight.Config_kD(0, 0, 10);
-	m_frontRight.ConfigClosedloopRamp(0.0, 10);
+		talons[i]->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
+		talons[i]->Config_kF(0, 15.57, 10);
+		talons[i]->Config_kP(0, 8.525, 10);
+		talons[i]->Config_kI(0, 0, 10);
+		talons[i]->Config_kD(0, 0, 10);
+		talons[i]->ConfigClosedloopRamp(0.0, 10);
+	}
 }
 
 void DriveTrain::resetSensors() {
