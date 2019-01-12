@@ -21,6 +21,7 @@
 class DriveTrain;
 class Input;
 class Autonomous;
+class Arduino;
 
 class Robot : public frc::IterativeRobot {
 public:
@@ -40,6 +41,7 @@ private:
 	std::unique_ptr< DriveTrain > m_driveTrain;
 	std::unique_ptr< Input > m_input;
 	std::unique_ptr< Autonomous > m_autonomous;
+	std::unique_ptr< Arduino > m_arduino;
 	std::unique_ptr< frc::SerialPort > m_serialPort;
 	std::unique_ptr< frc::AnalogInput > m_analogInput;
 	std::unique_ptr< frc::Compressor > m_compressor;
