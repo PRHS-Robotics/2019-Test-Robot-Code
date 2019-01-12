@@ -141,15 +141,6 @@ void DriveTrain::calibratePhase(double leftSpeed, double rightSpeed) {
 }
 
 void DriveTrain::drive(double leftSpeed, double rightSpeed) {
-	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
-	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
-
-	frc::SmartDashboard::PutNumber("Left Side Velocity", m_frontLeft.GetSelectedSensorVelocity(0));
-	frc::SmartDashboard::PutNumber("Right Side Velocity", m_frontRight.GetSelectedSensorVelocity(0));
-
-	frc::SmartDashboard::PutNumber("Left Side Error", leftSpeed * 60 - m_frontLeft.GetSelectedSensorVelocity(0));
-	frc::SmartDashboard::PutNumber("Right Side Error", rightSpeed * 60 - m_frontRight.GetSelectedSensorVelocity(0));
-
 	calibratePhase(leftSpeed, rightSpeed);
 
 	if (percent) {
@@ -157,7 +148,16 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 		m_frontRight.Set(ControlMode::PercentOutput, rightSpeed);
 	}
 	else {
-		m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 60);
-		m_frontRight.Set(ControlMode::Velocity, rightSpeed * 60);
+		m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 60.0);
+		m_frontRight.Set(ControlMode::Velocity, rightSpeed * 60.0);
 	}
+
+	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
+	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
+
+	frc::SmartDashboard::PutNumber("Left Side Velocity", m_frontLeft.GetSelectedSensorVelocity(0));
+	frc::SmartDashboard::PutNumber("Right Side Velocity", m_frontRight.GetSelectedSensorVelocity(0));
+
+	frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(0));
+	frc::SmartDashboard::PutNumber("Right Side Error", m_frontLeft.GetClosedLoopError(0));
 }
