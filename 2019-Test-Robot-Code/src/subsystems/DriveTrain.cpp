@@ -71,8 +71,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_backLeft.SetInverted(true);
 
 	// Configure both front left and front right talons identically
-	WPI_TalonSRX *talon = m_frontLeft;
-	std::array< WPI_TalonSRX*, 2 > talons = { m_frontLeft, m_frontRight };
+	std::array< WPI_TalonSRX*, 2 > talons = { &m_frontLeft, &m_frontRight };
 	for (int i = 0; i < 2; ++i) {
 		talons[i]->ConfigNominalOutputForward(0, 10);
 		talons[i]->ConfigNominalOutputReverse(0, 10);
