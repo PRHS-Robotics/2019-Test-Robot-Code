@@ -84,6 +84,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		talons[i]->Config_kI(0, 0, 10);
 		talons[i]->Config_kD(0, 0, 10);
 		talons[i]->ConfigClosedloopRamp(0.0, 10);
+		talons[i]->ConfigClosedLoopPeriod(0, 5, 10);
 	}
 }
 
