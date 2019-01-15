@@ -9,8 +9,10 @@
 #define SRC_SUBSYSTEMS_AUTONOMOUS_H_
 
 #include <cstddef>
-#include <Timer.h>
 #include <vector>
+#include <tuple>
+#include <pathfinder.h>
+#include <ctre/Phoenix.h>
 
 constexpr const std::size_t EDGES_PER_INCH_FAST = 10;
 constexpr const std::size_t EDGES_PER_INCH_SLOW = 5;
@@ -32,18 +34,17 @@ struct Action {
 	double duration;
 };
 
+std::pair< std::vector< Segment >, std::vector< Segment > > generateTrajectory(std::vector< Waypoint >& waypoints);
+
+void loadMotionProfilePoints(WPI_TalonSRX& motor, std::vector< Segment >& points);
+
+void loadPath(WPI_TalonSRX& leftMotor, WPI_TalonSRX& rightMotor, std::vector< Waypoint >& path);
+
 class Autonomous {
 public:
 
-	void run(DriveTrain& driveTrain);
-
-	void execute(DriveTrain& driveTrain, Action action);
-
-	std::vector< Action > m_actions;
-
 private:
 
-	Timer m_timer;
 };
 
 

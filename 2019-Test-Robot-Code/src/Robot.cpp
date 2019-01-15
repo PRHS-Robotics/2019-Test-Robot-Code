@@ -83,10 +83,6 @@ void Robot::AutonomousInit() {
 	} else {
 		// Default Auto goes here
 	}
-
-	m_autonomous->m_actions = { { 1.0, 1.0, 3.0 } };
-
-	m_autonomous->run(*m_driveTrain);
 }
 
 void Robot::AutonomousPeriodic() {
