@@ -84,6 +84,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		talons[i]->ConfigPeakOutputForward(1, 10);
 		talons[i]->ConfigPeakOutputReverse(-1, 10);
 
+		// TODO: Have 2 different profiles for low and high speed
 		talons[i]->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
 		talons[i]->ConfigClosedloopRamp(0.0, 10);
 	}
