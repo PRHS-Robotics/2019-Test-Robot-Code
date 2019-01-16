@@ -5,8 +5,8 @@
  *      Author: super-tails
  */
 
-#include "Autonomous.h"
-#include "DriveTrain.h"
+#include "subsystems/Autonomous.h"
+#include "subsystems/DriveTrain.h"
 #include "Timer.h"
 #include <ctre/Phoenix.h>
 
@@ -43,7 +43,7 @@ void loadMotionProfilePoints(WPI_TalonSRX& motor, std::vector< Segment >& points
 		point.headingDeg = 0.0;
 		point.profileSlotSelect0 = 0;
 		point.profileSlotSelect1 = 0;
-		point.timeDur = static_cast< TrajectoryDuration >(segment.dt); // TODO: Determine if we need to subtract the default time interval from this value
+		point.timeDur = segment.dt; // TODO: Determine if we need to subtract the default time interval from this value
 		point.zeroPos = (i == 0);
 		point.isLastPoint = (i + 1 == points.size());
 
