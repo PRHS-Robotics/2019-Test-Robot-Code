@@ -10,6 +10,7 @@
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
 #include "subsystems/Autonomous.h"
+#include "subsystems/Arduino.h"
 
 #include <iostream>
 
@@ -30,6 +31,8 @@ void Robot::RobotInit() {
 	if (m_serialPort && m_serialPort->StatusIsFatal()) {
 		m_serialPort = nullptr;
 	}
+
+	m_arduino = std::make_unique< Arduino >();
 
 	m_analogInput = std::make_unique< frc::AnalogInput >(0);
 	if (m_analogInput) {
@@ -80,10 +83,6 @@ void Robot::AutonomousInit() {
 	} else {
 		// Default Auto goes here
 	}
-
-	m_autonomous->m_actions = { { 1.0, 1.0, 3.0 } };
-
-	m_autonomous->run(*m_driveTrain);
 }
 
 void Robot::AutonomousPeriodic() {
@@ -98,6 +97,13 @@ void Robot::AutonomousPeriodic() {
 
 void Robot::TeleopInit() {
 	m_driveTrain->resetSensors();
+
+	if(m_arduino->handshake()) {
+		std::cout << "Successfully communicated with Arduino\n";
+	}
+	else {
+		std::cout << "Failed to establish communication with Arduino\n";
+	}
 }
 
 void Robot::TeleopPeriodic() {
