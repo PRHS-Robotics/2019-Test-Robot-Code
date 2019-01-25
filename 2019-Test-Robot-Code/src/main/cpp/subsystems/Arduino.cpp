@@ -32,7 +32,7 @@ bool Arduino::handshake() {
 	return recieve_buffer[0] - '0' == value + 1 && recieve_buffer[1] == 0;
 };
 
-std::pair< SensorFrame, bool > Arduino::readData() {
+std::pair< SensorFrame, bgiool > Arduino::readData() {
 	RxFrame rawFrame = readRawData();
 
 	// Check for basic transmission errors

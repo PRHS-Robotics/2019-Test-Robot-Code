@@ -7,10 +7,12 @@
 String piOutput = "none";
 
 String input = "blank";
+bool potentiometerCheck = false;
+int degreeVal;
 
 void loop() { 
  int sensorValue = analogRead(A5);
- int degreeVal = sensorValue / 3.86;
+ degreeVal = sensorValue / 3.86;
  //Serial.println(degreeVal);
  delay(10); 
  }
@@ -70,9 +72,11 @@ void receiveEvent(int bytes){
   }
 
   Serial.print("Sending (Hex): ");
-  Serial.println(receivedDigit + '0', HEX);
+  Serial.println(receivedDigit + '0', HEX); 
 
-  
+  if (data[0] == 1){
+    potentiometerCheck = true; //changes check bool to true if roborio asks for potentiometer
+  }
 }
 
 void requestEvent(){
@@ -87,5 +91,9 @@ void requestEvent(){
     	Serial.print(meters);
     	Serial.print("m");
       Wire.write(meters);
+    }
+    if (potentiometerCheck == true){
+      Wire.write(0x5FAF55AA);
+      Wire.write(degreeVal); //sends potentiometer degree value to roborio
     }
   }
