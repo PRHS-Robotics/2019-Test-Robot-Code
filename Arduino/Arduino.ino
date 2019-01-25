@@ -1,4 +1,5 @@
 #include <Wire.h>
+#include <Ultra.h>
 
 // sda on A4
 // scl on A5
@@ -16,6 +17,8 @@ void loop() {
 
 int receivedDigit;
 
+Ultra sensor1(11, 12);
+
 void setup(){
    Serial.begin(9600);
    Serial.println("yeet");
@@ -28,17 +31,26 @@ void setup(){
    Wire.write("Sending 7");
 }*/
 
+bool sendUltrasonic = false;
+
+bool sendHandshake = false;
+
 void receiveEvent(int bytes){
   Serial.println(bytes);
   if (bytes != 10) {
     receivedDigit = -1;
     return;
   }
-  char data[9];
+
+  char data[bytes];
   char *ptr = data;
   for (int i = 0; i < bytes; ++i) {
     *ptr++ = Wire.read();
   }
+
+  sendUltrasonic = (data[0] == 2);
+
+  sendHandshake = (strncmp(data, "Sending ", 8) == 0);
 
   if (strncmp(data, "Sending ", 8)) {
     receivedDigit = -1;
@@ -64,9 +76,16 @@ void receiveEvent(int bytes){
 }
 
 void requestEvent(){
-    Serial.println("bird");
-    char buf[2] = { 'b', 0 };
-    buf[0] = receivedDigit + '0';
-    Wire.write(buf);
-    //Wire.write("hello, world!");
+    if (sendHandshake) {
+      Serial.println("bird");
+      char buf[2] = { 'b', 0 };
+      buf[0] = receivedDigit + '0';
+      Wire.write(buf);
+    }
+    if (sendUltrasonic) {
+      double meters = sensor1.getDistance();
+    	Serial.print(meters);
+    	Serial.print("m");
+      Wire.write(meters);
+    }
   }
