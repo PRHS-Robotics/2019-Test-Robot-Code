@@ -10,6 +10,12 @@
 #include <time.h>
 #include <string>
 
+// "Sending _"
+// "_"
+
+// "Sending 5"
+// "6"
+
 bool Arduino::handshake() {
 	// Generate a random digit to send, we should recieve that digit + 1
 	srand(time(0));
