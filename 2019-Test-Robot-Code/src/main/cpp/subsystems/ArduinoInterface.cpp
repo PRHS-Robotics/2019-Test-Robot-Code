@@ -5,7 +5,7 @@
  *      Author: super-tails
  */
 
-#include "subsystems/Arduino.h"
+#include "subsystems/ArduinoInterface.h"
 #include <stdlib.h>
 #include <time.h>
 #include <string>
@@ -39,22 +39,35 @@ bool Arduino::handshake() {
 	return (recieve_buffer[0] - '0' == value + 1);
 };
 
+template< typename T >
+T correctEndianness(T value) {
+	unsigned char *data = reinterpret_cast< unsigned char* >(&value);
+	
+	std::reverse(data, data + sizeof(T), sizeof(T));
+
+	return *reinterpret_cast< T* >(data);
+}
+
 // TODO: Check endianness here too
 std::pair< SensorFrame, bool > Arduino::readData() {
 	RxFrame rawFrame = readRawData();
 
 	// Check for basic transmission errors
 	if (rawFrame.verification != RxFrame::magic_number) {
+		std::cout << "Received incorrect verification 0x" << std::hex << rawFrame.verification << "\n";
 		return { {}, false };
 	}
 
-	return { {}, true };
+	return {
+		{ rawFrame.degrees, rawFrame.distance },
+		true
+	};
 }
 
 // TODO: Check endianness
 // RoboRio is likely big endian and Arduinos are little endian
 Arduino::RxFrame Arduino::readRawData() {
-	TxFrame txFrame{ TxFrame::magic_number };
+	TxFrame txFrame{};
 	RxFrame rxFrame{};
 
 	m_i2c.WriteBulk(reinterpret_cast< uint8_t* >(&txFrame), sizeof(txFrame));

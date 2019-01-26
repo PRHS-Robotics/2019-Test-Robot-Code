@@ -13,7 +13,8 @@
 #include <tuple>
 
 struct SensorFrame {
-	// No sensor data yet
+	double degrees;
+	double distance;
 };
 
 class Arduino {
@@ -32,12 +33,14 @@ private:
 	struct RxFrame {
 		static constexpr const uint32_t magic_number = 0x5FAF55AA;
 		uint32_t verification = 0; // Recieved value should always be equal to 0x5FAF55AA, otherwise discard data
+		uint16_t degrees = 0;
+		double distance = 0.0;
 	};
 
 	// Raw data sent to the Arduino
 	struct TxFrame {
 		static constexpr const uint32_t magic_number = 0xAA55FAF5;
-		uint32_t verification = 0; // The Arduino should return an invalid RxFrame if this is not equal to 0xAA55FAF5
+		uint32_t verification = magic_number; // The Arduino should return an invalid RxFrame if this is not equal to 0xAA55FAF5
 	};
 
 	RxFrame readRawData();

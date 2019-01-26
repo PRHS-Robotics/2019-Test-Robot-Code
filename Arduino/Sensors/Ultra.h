@@ -15,7 +15,6 @@ private:
 	int echoPin; //echoPin location
 public:
 	Ultra(int trig, int echo);
-	//Loop function
 	double getDistance();
 };
 

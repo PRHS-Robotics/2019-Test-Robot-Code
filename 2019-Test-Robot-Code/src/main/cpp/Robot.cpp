@@ -111,6 +111,15 @@ void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
 
 	m_driveTrain->drive(m_input->getInput());
+
+	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
+		auto result = m_arduino->readData();
+		if (result.second) {
+			SensorFrame data = result.first;
+			std::cout << "Degrees: " << data.degrees << "\n";
+			std::cout << "Distance: " << data.distance << "\n";
+		}
+	}
 }
 
 void Robot::TestPeriodic() {}

@@ -18,7 +18,8 @@
 static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
 		{ "SHIFT_FAST", { "High Speed", 3 }, },
 		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
-		{ "TRIGGER", 	{ "Trigger", 1 } }
+		{ "TRIGGER", 	{ "Trigger", 1 } },
+		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } }
 };
 
 constexpr const std::size_t MAX_BUTTONS = 11;
