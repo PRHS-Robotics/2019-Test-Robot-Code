@@ -13,7 +13,7 @@ void loop() {
 
 Ultra sensor1(11, 12);
 
-Potentiometer pot(A5);
+Potentiometer pot(A0);
 
 #define BUFFER_SIZE 128
 char printBuffer[BUFFER_SIZE];
@@ -32,7 +32,7 @@ struct TxFrame {
   static constexpr const uint32_t magic_number = 0x5FAF55AA;
   uint32_t verification = magic_number;
   uint16_t degrees = 0.0;
-  double distance = 0.0;
+  uint16_t distance = 0.0;
 };
 
 TxFrame transmittedFrame;
@@ -49,6 +49,7 @@ void setup(){
 
   Serial.begin(9600);
   Serial.println("yeet");
+  Serial.println("yote");
   Wire.begin(80);
   Wire.onReceive(receiveEvent);
   Wire.onRequest(requestEvent); 
@@ -74,17 +75,25 @@ int getHandshakeDigit(unsigned char *data, int length) {
 }
 
 void receiveEvent(int bytes) {
+  Serial.println("owo");
   snprintf(printBuffer, 128, "Received %d bytes", bytes);
   Serial.println(printBuffer);
 
   unsigned char data[bytes];
-  for (unsigned char *ptr = data; ptr != data + bytes; ++ptr) {
-    *ptr = Wire.read();
+  unsigned char *ptr1 = data;
+  for (int i = 0; i < bytes; ++i) {
+    *ptr1++ = Wire.read();
   }
 
   receivedDigit = getHandshakeDigit(data, bytes);
 
   if (bytes == sizeof(RxFrame)) {
+    Serial.println("aaaaa");
+    for (int i = 0; i < bytes; ++i) {
+      Serial.print(int(data[i]), HEX);
+      Serial.print(", ");
+    }
+    Serial.println("");
     memcpy(reinterpret_cast< void* >(&receivedFrame), data, sizeof(RxFrame));
   }
 }
@@ -104,11 +113,28 @@ void requestEvent(){
 
   if (receivedFrame.verification != RxFrame::magic_number) {
     Serial.println("Rx Verification incorrect, sending null frame");
+    Serial.println(receivedFrame.verification);
     sendFrame(nullFrame);
   }
   else {
+    transmittedFrame.verification = TxFrame::magic_number;
     transmittedFrame.distance = sensor1.getDistance();
     transmittedFrame.degrees = pot.getDegrees();
+
+    //transmittedFrame.distance = 12345;
+    //transmittedFrame.degrees = 2.53;
+
+    Serial.print("Distance: ");
+    Serial.println(transmittedFrame.distance);
+    Serial.print("Degrees: ");
+    Serial.println(transmittedFrame.degrees);
+    Serial.println(sizeof(double));
+
+    for (int i = 0; i < sizeof(decltype(transmittedFrame.distance)); ++i) {
+      Serial.print(int(reinterpret_cast< unsigned char* >(&transmittedFrame.distance)[i]), HEX);
+      Serial.print(", ");
+    }
+    Serial.println("");
 
     sendFrame(transmittedFrame);
   }

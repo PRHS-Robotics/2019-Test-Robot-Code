@@ -34,7 +34,7 @@ private:
 		static constexpr const uint32_t magic_number = 0x5FAF55AA;
 		uint32_t verification = 0; // Recieved value should always be equal to 0x5FAF55AA, otherwise discard data
 		uint16_t degrees = 0;
-		double distance = 0.0;
+		uint16_t distance = 0.0;
 	};
 
 	// Raw data sent to the Arduino

@@ -17,6 +17,8 @@
 #include <AnalogInput.h>
 #include <Compressor.h>
 #include <SmartDashboard/SmartDashboard.h>
+#include <CameraServer.h>
+#include <networktables/NetworkTable.h>
 
 class DriveTrain;
 class Input;

@@ -10,13 +10,18 @@
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
 #include "subsystems/Autonomous.h"
-#include "subsystems/Arduino.h"
+#include "subsystems/ArduinoInterface.h"
 
 #include <iostream>
 
 #include <SmartDashboard/SmartDashboard.h>
 
+#include <networktables/NetworkTableEntry.h>
+#include <networktables/NetworkTableInstance.h>
+
 #include <Timer.h>
+
+#include <thread>
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -54,6 +59,9 @@ void Robot::RobotInit() {
 			m_compressor->Start();
 		}
 	}
+
+	frc::CameraServer *camser = frc::CameraServer::GetInstance();
+	camser->StartAutomaticCapture();
 
 	frc::SmartDashboard::init();
 
@@ -112,12 +120,28 @@ void Robot::TeleopPeriodic() {
 
 	m_driveTrain->drive(m_input->getInput());
 
+	auto ntinstance = nt::NetworkTableInstance::GetDefault();
+	auto table = ntinstance.GetTable("ChickenVision");
+
+	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
+	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
+
+	std::cout << "Detected: " << detected.GetBoolean(false) << "\n";
+	std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
+
 	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
 		auto result = m_arduino->readData();
 		if (result.second) {
 			SensorFrame data = result.first;
 			std::cout << "Degrees: " << data.degrees << "\n";
 			std::cout << "Distance: " << data.distance << "\n";
+			std::cout << sizeof(float) << "\n";
+
+			float value = 2.53;
+			for (int i = 0; i < 4; ++i) {
+				std::cout << std::hex << int(reinterpret_cast< unsigned char* >(&value)[i]) << ", ";
+			}
+			std::cout << "\n";
 		}
 	}
 }

@@ -43,7 +43,7 @@ template< typename T >
 T correctEndianness(T value) {
 	unsigned char *data = reinterpret_cast< unsigned char* >(&value);
 	
-	std::reverse(data, data + sizeof(T), sizeof(T));
+	std::reverse(data, data + sizeof(T));
 
 	return *reinterpret_cast< T* >(data);
 }
@@ -67,8 +67,8 @@ std::pair< SensorFrame, bool > Arduino::readData() {
 // TODO: Check endianness
 // RoboRio is likely big endian and Arduinos are little endian
 Arduino::RxFrame Arduino::readRawData() {
-	TxFrame txFrame{};
-	RxFrame rxFrame{};
+	TxFrame txFrame{ TxFrame::magic_number };
+	RxFrame rxFrame{ 0, 0, 0 };
 
 	m_i2c.WriteBulk(reinterpret_cast< uint8_t* >(&txFrame), sizeof(txFrame));
 	m_i2c.ReadOnly(sizeof(RxFrame), reinterpret_cast< uint8_t* >(&rxFrame));

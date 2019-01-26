@@ -80,12 +80,37 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 
 		// TODO: Have 2 different profiles for low and high speed
 		talons[i]->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
-		talons[i]->Config_kF(0, 15.57, 10);
-		talons[i]->Config_kP(0, 8.525, 10);
-		talons[i]->Config_kI(0, 0, 10);
-		talons[i]->Config_kD(0, 0, 10);
+		//talons[i]->Config_kF(0, 15.57, 10);
+		//talons[i]->Config_kP(0, /*8.525*/0, 10);
+		//talons[i]->Config_kI(0, 0, 10);
+		//talons[i]->Config_kD(0, 0, 10);
 		talons[i]->ConfigClosedloopRamp(0.0, 10);
 	}
+
+	m_frontLeft.Config_kF(0, 20.46 * 65.0 / 70.0, 10);
+	m_frontLeft.Config_kP(0, 20.46 * 65.0 / 70.0 / 2.0, 10);
+	m_frontLeft.Config_kI(0, 20.46 * 65.0 / 70.0 / 2.0 / 1000.0, 10);
+	m_frontLeft.Config_kD(0, 0, 10);
+
+	m_frontRight.Config_kF(0, 20.46, 10);
+	m_frontRight.Config_kP(0, 20.46 / 2.0, 10);
+	m_frontRight.Config_kI(0, 20.46 / 2.0 / 1000.0 , 10);
+	m_frontRight.Config_kD(0, 0, 10);
+
+
+	m_frontLeft.Config_kF(1, 6.02, 10);
+	m_frontLeft.Config_kP(1, 6.02 / 2.0, 10);
+	m_frontLeft.Config_kI(1, 6.02 / 4.0 / 1000.0, 10);
+	m_frontLeft.Config_kD(1, 0, 10);
+
+	m_frontRight.Config_kF(1, 8.525, 10);
+	m_frontRight.Config_kP(1, 8.525 / 2.0, 10);
+	m_frontRight.Config_kI(1, 8.525 / 4.0 / 1000.0, 10);
+	m_frontRight.Config_kD(1, 0, 10);
+
+	m_frontLeft.SetSensorPhase(true);
+
+	m_frontRight.SetSensorPhase(true);
 }
 
 void DriveTrain::resetSensors() {
@@ -95,6 +120,8 @@ void DriveTrain::resetSensors() {
 
 bool percent = false;
 
+bool fast = false;
+
 void DriveTrain::drive(InputState state) {
 	double lSpeed = -state.y + state.r;
 	double rSpeed = -state.y - state.r;
@@ -103,6 +130,9 @@ void DriveTrain::drive(InputState state) {
 
 	m_shiftFast.Set(buttonValue(state, "SHIFT_FAST"));
 	m_shiftSlow.Set(buttonValue(state, "SHIFT_SLOW"));
+
+	fast |= buttonValue(state, "SHIFT_FAST");
+	fast &= !buttonValue(state, "SHIFT_SLOW");
 
 	percent = buttonValue(state, "TRIGGER");
 
@@ -148,15 +178,55 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 		m_frontRight.Set(ControlMode::PercentOutput, rightSpeed);
 	}
 	else {
-		m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 60.0);
-		m_frontRight.Set(ControlMode::Velocity, rightSpeed * 60.0);
+		if (fast) {
+			m_frontLeft.SelectProfileSlot(1, 0);
+			m_frontRight.SelectProfileSlot(1, 0);
+
+			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 100.0);
+			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 100.0);
+		}
+		else {
+			m_frontLeft.SelectProfileSlot(0, 0);
+			m_frontRight.SelectProfileSlot(0, 0);
+
+			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 35.0);
+			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 35.0);
+		}
+	}
+
+	static std::vector< int > lvel(30);
+	static int li = 0;
+
+	lvel[li] = m_frontLeft.GetSelectedSensorVelocity(0);
+
+	li = (li + 1) % 30;
+
+	double lavg = 0;
+	for (int i = 0; i < 30; ++i) {
+		lavg += lvel[i] / 30.0;
+	}
+
+	static std::vector< int > rvel(30);
+	static int ri = 0;
+
+	rvel[ri] = m_frontRight.GetSelectedSensorVelocity(0);
+
+	ri = (ri + 1) % 30;
+
+	double ravg = 0;
+	for (int i = 0; i < 30; ++i) {
+		ravg += rvel[i] / 30.0;
 	}
 
 	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
 	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
 
-	frc::SmartDashboard::PutNumber("Left Side Velocity", m_frontLeft.GetSelectedSensorVelocity(0));
-	frc::SmartDashboard::PutNumber("Right Side Velocity", m_frontRight.GetSelectedSensorVelocity(0));
+	//frc::SmartDashboard::PutNumber("Left Side Velocity", m_frontLeft.GetSelectedSensorVelocity(0));
+	//frc::SmartDashboard::PutNumber("Right Side Velocity", m_frontRight.GetSelectedSensorVelocity(0));
+
+	frc::SmartDashboard::PutNumber("Left Side Velocity", lavg);
+	frc::SmartDashboard::PutNumber("Right Side Velocity", ravg);
+
 
 	frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(0));
 	frc::SmartDashboard::PutNumber("Right Side Error", m_frontLeft.GetClosedLoopError(0));
