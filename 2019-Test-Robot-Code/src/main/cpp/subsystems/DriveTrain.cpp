@@ -78,12 +78,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		talons[i]->ConfigPeakOutputForward(1, 10);
 		talons[i]->ConfigPeakOutputReverse(-1, 10);
 
-		// TODO: Have 2 different profiles for low and high speed
 		talons[i]->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
-		//talons[i]->Config_kF(0, 15.57, 10);
-		//talons[i]->Config_kP(0, /*8.525*/0, 10);
-		//talons[i]->Config_kI(0, 0, 10);
-		//talons[i]->Config_kD(0, 0, 10);
 		talons[i]->ConfigClosedloopRamp(0.0, 10);
 	}
 
@@ -194,38 +189,17 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 		}
 	}
 
-	static std::vector< int > lvel(30);
-	static int li = 0;
+	static MovingAverage leftVelocityAverage(30);
+	static MovingAverage rightVelocityAverage(30);
 
-	lvel[li] = m_frontLeft.GetSelectedSensorVelocity(0);
-
-	li = (li + 1) % 30;
-
-	double lavg = 0;
-	for (int i = 0; i < 30; ++i) {
-		lavg += lvel[i] / 30.0;
-	}
-
-	static std::vector< int > rvel(30);
-	static int ri = 0;
-
-	rvel[ri] = m_frontRight.GetSelectedSensorVelocity(0);
-
-	ri = (ri + 1) % 30;
-
-	double ravg = 0;
-	for (int i = 0; i < 30; ++i) {
-		ravg += rvel[i] / 30.0;
-	}
+	const double leftVelocity = m_frontLeft.GetSelectedSensorVelocity(0);
+	const double rightVelocity = m_frontRight.GetSelectedSensorVelocity(0);
 
 	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
 	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
 
-	//frc::SmartDashboard::PutNumber("Left Side Velocity", m_frontLeft.GetSelectedSensorVelocity(0));
-	//frc::SmartDashboard::PutNumber("Right Side Velocity", m_frontRight.GetSelectedSensorVelocity(0));
-
-	frc::SmartDashboard::PutNumber("Left Side Velocity", lavg);
-	frc::SmartDashboard::PutNumber("Right Side Velocity", ravg);
+	frc::SmartDashboard::PutNumber("Left Side Velocity", leftVelocityAverage.Process(leftVelocity));
+	frc::SmartDashboard::PutNumber("Right Side Velocity", rightVelocityAverage.Process(rightVelocity));
 
 
 	frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(0));

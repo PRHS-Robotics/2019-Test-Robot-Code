@@ -9,12 +9,17 @@
 #include "subsystems/DriveTrain.h"
 #include "Timer.h"
 #include <ctre/Phoenix.h>
+#include <iostream>
 
 std::pair< std::vector< Segment >, std::vector< Segment > > generateTrajectory(std::vector< Waypoint >& waypoints) {
-	TrajectoryCandidate candidate;
+	TrajectoryCandidate candidate{ 0 };
 
 	// TODO: Determine actual maximum velocity and acceleration values
-	pathfinder_prepare(waypoints.data(), waypoints.size(), FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_HIGH, 0.001, 15.0, 10.0, 60.0, &candidate);
+	candidate.length = pathfinder_prepare(waypoints.data(), waypoints.size(), FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_FAST, 0.01, 15.0, 10.0, 60.0, &candidate);
+
+	//candidate.length = candidate.path_length;
+
+	std::cout << "Candidate length: " << candidate.length << "\n";
 
 	std::vector< Segment > trajectory(candidate.length);
 

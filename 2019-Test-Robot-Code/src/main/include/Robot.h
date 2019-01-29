@@ -10,12 +10,13 @@
 #include <memory>
 
 #include <string>
+#include <thread>
 
-#include <IterativeRobot.h>
+#include <frc/TimedRobot.h>
 #include <SmartDashboard/SendableChooser.h>
-#include <SerialPort.h>
-#include <AnalogInput.h>
-#include <Compressor.h>
+#include <frc/SerialPort.h>
+#include <frc/AnalogInput.h>
+#include <frc/Compressor.h>
 #include <SmartDashboard/SmartDashboard.h>
 #include <CameraServer.h>
 #include <networktables/NetworkTable.h>
@@ -25,7 +26,7 @@ class Input;
 class Autonomous;
 class Arduino;
 
-class Robot : public frc::IterativeRobot {
+class Robot : public frc::TimedRobot {
 public:
 	void RobotInit() override;
 	void AutonomousInit() override;
@@ -47,4 +48,5 @@ private:
 	std::unique_ptr< frc::SerialPort > m_serialPort;
 	std::unique_ptr< frc::AnalogInput > m_analogInput;
 	std::unique_ptr< frc::Compressor > m_compressor;
+	std::unique_ptr< std::thread > m_calculation;
 };

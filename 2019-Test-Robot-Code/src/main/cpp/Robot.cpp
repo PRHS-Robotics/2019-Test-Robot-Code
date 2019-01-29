@@ -19,9 +19,19 @@
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableInstance.h>
 
-#include <Timer.h>
+#include <frc/Timer.h>
 
 #include <thread>
+
+int main(int argc, char *argv[]) {
+	frc::StartRobot< Robot >();
+}
+
+std::pair< std::vector< Segment >, std::vector< Segment > > pathresult;
+
+auto f = [&pathresult](std::vector< Waypoint > waypoints) {
+	pathresult = generateTrajectory(waypoints);
+};
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -60,8 +70,15 @@ void Robot::RobotInit() {
 		}
 	}
 
-	frc::CameraServer *camser = frc::CameraServer::GetInstance();
-	camser->StartAutomaticCapture();
+	std::vector< Waypoint > waypoints = {
+		{ 0.0, 1.0, 0.0 },
+		{ 0.0, 3.0, 0.0 }
+	};
+
+	//m_calculation = std::make_unique< std::thread >(f, waypoints);
+
+	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
+	camser->StartAutomaticCapture();*/
 
 	frc::SmartDashboard::init();
 
@@ -80,11 +97,13 @@ void Robot::RobotInit() {
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
+
 void Robot::AutonomousInit() {
 	m_autoSelected = m_chooser.GetSelected();
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
+
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -112,13 +131,18 @@ void Robot::TeleopInit() {
 	else {
 		std::cout << "Failed to establish communication with Arduino\n";
 	}
+
+	//m_calculation->join();
+
+
+	for (auto& point : pathresult.first) {
+		std::cout << "Time: " << point.dt << "\n";
+	}	
 }
 
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
-
-	m_driveTrain->drive(m_input->getInput());
 
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
@@ -126,8 +150,43 @@ void Robot::TeleopPeriodic() {
 	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
 
-	std::cout << "Detected: " << detected.GetBoolean(false) << "\n";
-	std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
+	static bool lastDetected = false;
+
+	if (detected.GetBoolean(false) && buttonValue(m_input->getInput(), "SEARCH_AND_DESTROY")) {
+		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
+
+		double yawValue = yaw.GetDouble(0.0);
+
+		const int SAMPLES = 10;
+		static MovingAverage yawAverager(SAMPLES);
+
+		if (detected.GetBoolean(false) && !lastDetected) {
+			yawAverager.Clear();
+		}
+
+		lastDetected = detected.GetBoolean(false);
+
+		double speed = 0.0;
+
+		double yawAverage = yawAverager.Process(yawValue);
+
+		if (yawAverage > -10 && yawAverage < 10) {
+			speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
+		}
+
+		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
+
+		// TODO: Add gradual ramp-up
+		m_driveTrain->drive(yawAverage / 30.0 + speed, -yawAverage / 30.0 + speed);
+	}
+	else if (buttonValue(m_input->getInput(), "DEBUG_BUTTON_2")) {
+		// Drive at constant speed for PID tuning
+		double speed = frc::SmartDashboard::GetNumber("PID Test Speed", 0.5);
+		m_driveTrain->drive(speed, speed);
+	}
+	else {
+		m_driveTrain->drive(m_input->getInput());
+	}
 
 	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
 		auto result = m_arduino->readData();
@@ -148,4 +207,4 @@ void Robot::TeleopPeriodic() {
 
 void Robot::TestPeriodic() {}
 
-START_ROBOT_CLASS(Robot)
+//START_ROBOT_CLASS(Robot)

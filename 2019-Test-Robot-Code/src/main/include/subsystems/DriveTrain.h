@@ -13,9 +13,7 @@
 #include <memory>
 
 #include <ctre/Phoenix.h>
-#include <SpeedControllerGroup.h>
-#include <Drive/DifferentialDrive.h>
-#include <Solenoid.h>
+#include <frc/Solenoid.h>
 
 class DriveTrain {
 public:
