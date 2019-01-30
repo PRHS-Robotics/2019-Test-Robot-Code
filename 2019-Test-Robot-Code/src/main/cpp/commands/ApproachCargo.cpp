@@ -31,7 +31,7 @@ void ApproachCargo::Execute() {
 
 		double yawValue = yaw.GetDouble(0.0);
 
-		const int SAMPLES = 10;
+		const int SAMPLES = 2;
 		static MovingAverage yawAverager(SAMPLES);
 
 		if (detected.GetBoolean(false) && !m_lastDetected) {
@@ -49,9 +49,12 @@ void ApproachCargo::Execute() {
 		}
 
 		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
+		static double yawCurrent = 0;
+		double yawDiff;
 
-		// TODO: Add gradual ramp-up
-		Robot::m_driveTrain->drive(yawAverage / 30.0 + speed, -yawAverage / 30.0 + speed);
+		yawDiff = yawAverage - yawCurrent;
+		yawCurrent += yawDiff / 5.0;
+		Robot::m_driveTrain->drive(yawCurrent / 3.0 + speed, -yawCurrent / 3.0 + speed);
 	}
 }
 
