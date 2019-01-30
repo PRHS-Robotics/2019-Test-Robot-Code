@@ -38,9 +38,6 @@ std::pair< int, int > DriveTrain::getEncoderPositions() {
 }
 
 DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight) :
-	m_manualControl(std::make_unique< ManualControl >(Robot::m_input.get())),
-	m_approachCargo(std::make_unique< ApproachCargo >(10)),
-	m_speedTest(std::make_unique< SpeedTest >(0.5)),
 	m_frontLeft(frontLeft),
 	m_midLeft(midLeft),
 	m_backLeft(backLeft),
@@ -119,7 +116,7 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 }
 
 void DriveTrain::InitDefaultCommand() {
-	SetDefaultCommand(m_manualControl.get());
+	SetDefaultCommand(Robot::m_manualControl.get());
 }
 
 void DriveTrain::resetSensors() {

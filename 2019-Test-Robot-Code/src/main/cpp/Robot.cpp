@@ -33,12 +33,17 @@ auto f = [](std::vector< Waypoint > waypoints) {
 
 std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
 std::unique_ptr< Input > Robot::m_input{};
-std::unique_ptr< Autonomous > Robot::m_autonomous{};
+//std::unique_ptr< Autonomous > Robot::m_autonomous{};
 std::unique_ptr< Arduino > Robot::m_arduino{};
 std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 std::unique_ptr< std::thread > Robot::m_calculation{};
+
+std::unique_ptr< ManualControl > Robot::m_manualControl{};
+std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
+std::unique_ptr< SpeedTest > Robot::m_speedTest{};
+std::unique_ptr< FollowPath > Robot::m_followPath{};
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -82,6 +87,10 @@ void Robot::RobotInit() {
 		{ 0.0, 3.0, 0.0 }
 	};
 
+	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get()),
+	m_approachCargo = std::make_unique< ApproachCargo >(10),
+	m_speedTest = std::make_unique< SpeedTest >(0.5),
+
 	//m_calculation = std::make_unique< std::thread >(f, waypoints);
 
 	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
@@ -92,9 +101,9 @@ void Robot::RobotInit() {
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
 
-	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_driveTrain->m_manualControl.get());
-	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_driveTrain->m_approachCargo.get());
-	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_driveTrain->m_speedTest.get());
+	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
+	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
+	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
 }
 
 /**

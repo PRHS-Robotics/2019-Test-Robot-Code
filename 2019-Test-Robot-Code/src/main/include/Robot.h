@@ -22,6 +22,12 @@
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTable.h>
 
+
+#include "commands/ApproachCargo.h"
+#include "commands/ManualControl.h"
+#include "commands/SpeedTest.h"
+#include "commands/FollowPath.h"
+
 class DriveTrain;
 class Input;
 class Autonomous;
@@ -43,10 +49,15 @@ public:
 
 	static std::unique_ptr< DriveTrain > m_driveTrain;
 	static std::unique_ptr< Input > m_input;
-	static std::unique_ptr< Autonomous > m_autonomous;
+	//static std::unique_ptr< Autonomous > m_autonomous;
 	static std::unique_ptr< Arduino > m_arduino;
 	static std::unique_ptr< frc::SerialPort > m_serialPort;
 	static std::unique_ptr< frc::AnalogInput > m_analogInput;
 	static std::unique_ptr< frc::Compressor > m_compressor;
 	static std::unique_ptr< std::thread > m_calculation;
+
+	static std::unique_ptr< ManualControl > m_manualControl;
+	static std::unique_ptr< ApproachCargo > m_approachCargo;
+	static std::unique_ptr< SpeedTest > m_speedTest;
+	static std::unique_ptr< FollowPath > m_followPath;
 };

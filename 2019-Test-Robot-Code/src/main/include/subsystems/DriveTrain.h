@@ -16,11 +16,6 @@
 #include <frc/Solenoid.h>
 #include <frc/commands/Subsystem.h>
 
-#include "commands/ApproachCargo.h"
-#include "commands/ManualControl.h"
-#include "commands/SpeedTest.h"
-#include "commands/FollowPath.h"
-
 class DriveTrain : public frc::Subsystem {
 public:
 
@@ -35,11 +30,6 @@ public:
 	void resetSensors();
 
 	void InitDefaultCommand() override;
-
-	std::unique_ptr< ManualControl > m_manualControl;
-	std::unique_ptr< ApproachCargo > m_approachCargo;
-	std::unique_ptr< SpeedTest > m_speedTest;
-	std::unique_ptr< FollowPath > m_followPath;
 
 private:
 
