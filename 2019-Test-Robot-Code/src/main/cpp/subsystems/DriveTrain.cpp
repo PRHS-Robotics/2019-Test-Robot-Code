@@ -6,6 +6,7 @@
  */
 
 #include "subsystems/DriveTrain.h"
+#include "Robot.h"
 #include <iostream>
 #include <algorithm>
 #include <SmartDashboard/SmartDashboard.h>
@@ -32,7 +33,14 @@ void DriveTrain::setRightSidePhase(bool phase) {
 	m_frontRight.SetSensorPhase(phase);
 }
 
+std::pair< int, int > DriveTrain::getEncoderPositions() {
+	return { m_frontLeft.GetSelectedSensorPosition(), m_frontRight.GetSelectedSensorPosition() };
+}
+
 DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight) :
+	m_manualControl(std::make_unique< ManualControl >(Robot::m_input.get())),
+	m_approachCargo(std::make_unique< ApproachCargo >(10)),
+	m_speedTest(std::make_unique< SpeedTest >(0.5)),
 	m_frontLeft(frontLeft),
 	m_midLeft(midLeft),
 	m_backLeft(backLeft),
@@ -41,7 +49,8 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_backRight(backRight),
 	m_arm(7),
 	m_shiftFast(0),
-	m_shiftSlow(1)
+	m_shiftSlow(1),
+	Subsystem("DriveTrain")
 {
 	if (!frc::SmartDashboard::SetDefaultBoolean("Left Sensor Phase", false)) {
 		std::cout << "Setting default left side phase\n";
@@ -104,8 +113,13 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	m_frontRight.Config_kD(1, 0, 10);
 
 	m_frontLeft.SetSensorPhase(true);
-
 	m_frontRight.SetSensorPhase(true);
+
+	frc::Scheduler::GetInstance()->RegisterSubsystem(this);
+}
+
+void DriveTrain::InitDefaultCommand() {
+	SetDefaultCommand(m_manualControl.get());
 }
 
 void DriveTrain::resetSensors() {

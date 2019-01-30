@@ -16,9 +16,6 @@
 
 #include <SmartDashboard/SmartDashboard.h>
 
-#include <networktables/NetworkTableEntry.h>
-#include <networktables/NetworkTableInstance.h>
-
 #include <frc/Timer.h>
 
 #include <thread>
@@ -29,9 +26,19 @@ int main(int argc, char *argv[]) {
 
 std::pair< std::vector< Segment >, std::vector< Segment > > pathresult;
 
-auto f = [&pathresult](std::vector< Waypoint > waypoints) {
+auto f = [](std::vector< Waypoint > waypoints) {
 	pathresult = generateTrajectory(waypoints);
 };
+
+
+std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
+std::unique_ptr< Input > Robot::m_input{};
+std::unique_ptr< Autonomous > Robot::m_autonomous{};
+std::unique_ptr< Arduino > Robot::m_arduino{};
+std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
+std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
+std::unique_ptr< frc::Compressor > Robot::m_compressor{};
+std::unique_ptr< std::thread > Robot::m_calculation{};
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -84,6 +91,10 @@ void Robot::RobotInit() {
 
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
+
+	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_driveTrain->m_manualControl.get());
+	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_driveTrain->m_approachCargo.get());
+	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_driveTrain->m_speedTest.get());
 }
 
 /**
@@ -144,49 +155,7 @@ void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
 
-	auto ntinstance = nt::NetworkTableInstance::GetDefault();
-	auto table = ntinstance.GetTable("ChickenVision");
-
-	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
-	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
-
-	static bool lastDetected = false;
-
-	if (detected.GetBoolean(false) && buttonValue(m_input->getInput(), "SEARCH_AND_DESTROY")) {
-		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
-
-		double yawValue = yaw.GetDouble(0.0);
-
-		const int SAMPLES = 10;
-		static MovingAverage yawAverager(SAMPLES);
-
-		if (detected.GetBoolean(false) && !lastDetected) {
-			yawAverager.Clear();
-		}
-
-		lastDetected = detected.GetBoolean(false);
-
-		double speed = 0.0;
-
-		double yawAverage = yawAverager.Process(yawValue);
-
-		if (yawAverage > -10 && yawAverage < 10) {
-			speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
-		}
-
-		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
-
-		// TODO: Add gradual ramp-up
-		m_driveTrain->drive(yawAverage / 30.0 + speed, -yawAverage / 30.0 + speed);
-	}
-	else if (buttonValue(m_input->getInput(), "DEBUG_BUTTON_2")) {
-		// Drive at constant speed for PID tuning
-		double speed = frc::SmartDashboard::GetNumber("PID Test Speed", 0.5);
-		m_driveTrain->drive(speed, speed);
-	}
-	else {
-		m_driveTrain->drive(m_input->getInput());
-	}
+	frc::Scheduler::GetInstance()->Run();
 
 	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
 		auto result = m_arduino->readData();

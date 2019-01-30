@@ -40,13 +40,4 @@ void loadMotionProfilePoints(WPI_TalonSRX& motor, std::vector< Segment >& points
 
 void loadPath(WPI_TalonSRX& leftMotor, WPI_TalonSRX& rightMotor, std::vector< Waypoint >& path);
 
-class Autonomous {
-public:
-
-private:
-
-};
-
-
-
 #endif /* SRC_SUBSYSTEMS_AUTONOMOUS_H_ */

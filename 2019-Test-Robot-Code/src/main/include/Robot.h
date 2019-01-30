@@ -13,12 +13,13 @@
 #include <thread>
 
 #include <frc/TimedRobot.h>
-#include <SmartDashboard/SendableChooser.h>
+#include <frc/smartdashboard/SendableChooser.h>
 #include <frc/SerialPort.h>
 #include <frc/AnalogInput.h>
 #include <frc/Compressor.h>
-#include <SmartDashboard/SmartDashboard.h>
-#include <CameraServer.h>
+#include <frc/commands/Scheduler.h>
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTable.h>
 
 class DriveTrain;
@@ -35,18 +36,17 @@ public:
 	void TeleopPeriodic() override;
 	void TestPeriodic() override;
 
-private:
 	frc::SendableChooser<std::string> m_chooser;
 	const std::string kAutoNameDefault = "Default";
 	const std::string kAutoNameCustom = "My Auto";
 	std::string m_autoSelected;
 
-	std::unique_ptr< DriveTrain > m_driveTrain;
-	std::unique_ptr< Input > m_input;
-	std::unique_ptr< Autonomous > m_autonomous;
-	std::unique_ptr< Arduino > m_arduino;
-	std::unique_ptr< frc::SerialPort > m_serialPort;
-	std::unique_ptr< frc::AnalogInput > m_analogInput;
-	std::unique_ptr< frc::Compressor > m_compressor;
-	std::unique_ptr< std::thread > m_calculation;
+	static std::unique_ptr< DriveTrain > m_driveTrain;
+	static std::unique_ptr< Input > m_input;
+	static std::unique_ptr< Autonomous > m_autonomous;
+	static std::unique_ptr< Arduino > m_arduino;
+	static std::unique_ptr< frc::SerialPort > m_serialPort;
+	static std::unique_ptr< frc::AnalogInput > m_analogInput;
+	static std::unique_ptr< frc::Compressor > m_compressor;
+	static std::unique_ptr< std::thread > m_calculation;
 };

@@ -15,7 +15,7 @@ std::pair< std::vector< Segment >, std::vector< Segment > > generateTrajectory(s
 	TrajectoryCandidate candidate{ 0 };
 
 	// TODO: Determine actual maximum velocity and acceleration values
-	candidate.length = pathfinder_prepare(waypoints.data(), waypoints.size(), FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_FAST, 0.01, 15.0, 10.0, 60.0, &candidate);
+	candidate.length = pathfinder_prepare(waypoints.data(), waypoints.size(), FIT_HERMITE_CUBIC, PATHFINDER_SAMPLES_FAST, 0.02, 15.0, 10.0, 60.0, &candidate);
 
 	//candidate.length = candidate.path_length;
 
