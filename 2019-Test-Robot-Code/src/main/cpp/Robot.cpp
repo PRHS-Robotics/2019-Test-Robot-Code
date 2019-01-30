@@ -10,13 +10,35 @@
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
 #include "subsystems/Autonomous.h"
-#include "subsystems/Arduino.h"
+#include "subsystems/ArduinoInterface.h"
 
 #include <iostream>
 
 #include <SmartDashboard/SmartDashboard.h>
 
-#include <Timer.h>
+#include <frc/Timer.h>
+
+#include <thread>
+
+int main(int argc, char *argv[]) {
+	frc::StartRobot< Robot >();
+}
+
+std::pair< std::vector< Segment >, std::vector< Segment > > pathresult;
+
+auto f = [](std::vector< Waypoint > waypoints) {
+	pathresult = generateTrajectory(waypoints);
+};
+
+
+std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
+std::unique_ptr< Input > Robot::m_input{};
+std::unique_ptr< Autonomous > Robot::m_autonomous{};
+std::unique_ptr< Arduino > Robot::m_arduino{};
+std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
+std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
+std::unique_ptr< frc::Compressor > Robot::m_compressor{};
+std::unique_ptr< std::thread > Robot::m_calculation{};
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -55,10 +77,24 @@ void Robot::RobotInit() {
 		}
 	}
 
+	std::vector< Waypoint > waypoints = {
+		{ 0.0, 1.0, 0.0 },
+		{ 0.0, 3.0, 0.0 }
+	};
+
+	//m_calculation = std::make_unique< std::thread >(f, waypoints);
+
+	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
+	camser->StartAutomaticCapture();*/
+
 	frc::SmartDashboard::init();
 
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
+
+	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_driveTrain->m_manualControl.get());
+	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_driveTrain->m_approachCargo.get());
+	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_driveTrain->m_speedTest.get());
 }
 
 /**
@@ -72,11 +108,13 @@ void Robot::RobotInit() {
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
+
 void Robot::AutonomousInit() {
 	m_autoSelected = m_chooser.GetSelected();
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
+
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -104,15 +142,38 @@ void Robot::TeleopInit() {
 	else {
 		std::cout << "Failed to establish communication with Arduino\n";
 	}
+
+	//m_calculation->join();
+
+
+	for (auto& point : pathresult.first) {
+		std::cout << "Time: " << point.dt << "\n";
+	}	
 }
 
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
 
-	m_driveTrain->drive(m_input->getInput());
+	frc::Scheduler::GetInstance()->Run();
+
+	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
+		auto result = m_arduino->readData();
+		if (result.second) {
+			SensorFrame data = result.first;
+			std::cout << "Degrees: " << data.degrees << "\n";
+			std::cout << "Distance: " << data.distance << "\n";
+			std::cout << sizeof(float) << "\n";
+
+			float value = 2.53;
+			for (int i = 0; i < 4; ++i) {
+				std::cout << std::hex << int(reinterpret_cast< unsigned char* >(&value)[i]) << ", ";
+			}
+			std::cout << "\n";
+		}
+	}
 }
 
 void Robot::TestPeriodic() {}
 
-START_ROBOT_CLASS(Robot)
+//START_ROBOT_CLASS(Robot)
