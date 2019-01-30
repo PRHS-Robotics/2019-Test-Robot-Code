@@ -1,13 +1,14 @@
 #include "commands/FollowPath.h"
-#include "subsystems/DriverTrain.h"
+#include "subsystems/DriveTrain.h"
+#include "Robot.h"
 
 FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > rightData) :
-    m_lFollower{ 0, 0, 0, 0, 0 },
-    m_rFollower{ 0, 0, 0, 0, 0 },
-    m_config{ 0, 96, 0.6383528 /* ish */, 1.0, 0.0, 0.0, 1.0 / 15.0, 0.0 }
+    m_lFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
+    m_rFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
+    m_config(EncoderConfig{ 0, 96, 0.6383528 /* ish */, 1.0, 0.0, 0.0, 1.0 / 15.0, 0.0 }),
     m_leftData(leftData),
     m_rightData(rightData),
-    Command("FollowPath", Robot::m_driveTrain.get())
+    Command("FollowPath", *Robot::m_driveTrain.get())
 {
 
 }
@@ -27,7 +28,7 @@ void FollowPath::Execute() {
     double l = pathfinder_follow_encoder(
         m_config,
         &m_lFollower,
-        m_leftData.get(),
+        m_leftData.data(),
         m_leftData.size(),
         Robot::m_driveTrain->getEncoderPositions().first
     );
@@ -35,7 +36,7 @@ void FollowPath::Execute() {
     double r = pathfinder_follow_encoder(
         m_config,
         &m_rFollower,
-        m_rightData.get(),
+        m_rightData.data(),
         m_rightData.size(),
         Robot::m_driveTrain->getEncoderPositions().second
     );
@@ -43,4 +44,16 @@ void FollowPath::Execute() {
     // TODO: Apparently you need a gyro????
 
     Robot::m_driveTrain->drive(l, r);
+}
+
+bool FollowPath::IsFinished() {
+    return false;
+}
+
+void FollowPath::End() {
+    Robot::m_driveTrain->drive(0.0, 0.0);
+}
+
+void FollowPath::Interrupted() {
+    End();
 }

@@ -2,7 +2,9 @@
 
 #include <pathfinder.h>
 
-#include <frc/commands/commands/Command.h>
+#include <vector>
+
+#include <frc/commands/Command.h>
 
 class FollowPath : public frc::Command {
 public:
