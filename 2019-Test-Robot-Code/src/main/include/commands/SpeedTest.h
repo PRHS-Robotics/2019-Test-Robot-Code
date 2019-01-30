@@ -1,10 +1,12 @@
 #pragma once
 
+#include "subsystems/Input.h"
+
 #include <frc/commands/Command.h>
 
 class SpeedTest : public frc::Command {
 public:
-    SpeedTest(double speed);
+    SpeedTest(Input *input);
 
     void Initialize() override;
 
@@ -17,5 +19,5 @@ public:
     void Interrupted() override;
 
 private:
-    double m_speed;
+    Input *m_input;
 };

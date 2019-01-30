@@ -30,7 +30,7 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 constexpr const std::size_t MAX_BUTTONS = 11;
 
 struct InputState {
-	double x, y, r;
+	double x, y, r, t;
 	std::bitset< MAX_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
 };
 

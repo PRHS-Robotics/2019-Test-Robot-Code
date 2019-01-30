@@ -89,7 +89,7 @@ void Robot::RobotInit() {
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get()),
 	m_approachCargo = std::make_unique< ApproachCargo >(10),
-	m_speedTest = std::make_unique< SpeedTest >(0.5),
+	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get()),
 
 	//m_calculation = std::make_unique< std::thread >(f, waypoints);
 
@@ -151,6 +151,12 @@ void Robot::TeleopInit() {
 	else {
 		std::cout << "Failed to establish communication with Arduino\n";
 	}
+
+	//m_calculation->join();
+
+	for (auto& point : pathresult.first) {
+		std::cout << "Time: " << point.dt << "\n";
+	}	
 }
 
 void Robot::TeleopPeriodic() {
