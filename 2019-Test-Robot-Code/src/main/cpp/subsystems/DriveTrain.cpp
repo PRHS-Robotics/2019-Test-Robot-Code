@@ -88,25 +88,32 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		talons[i]->ConfigClosedloopRamp(0.0, 10);
 	}
 
+	// Gains for low speed
 	m_frontLeft.Config_kF(0, 20.46 * 65.0 / 70.0, 10);
 	m_frontLeft.Config_kP(0, 20.46 * 65.0 / 70.0 / 2.0, 10);
-	m_frontLeft.Config_kI(0, 20.46 * 65.0 / 70.0 / 2.0 / 1000.0, 10);
+	m_frontLeft.Config_kI(0, 0, 10);
 	m_frontLeft.Config_kD(0, 0, 10);
 
 	m_frontRight.Config_kF(0, 20.46, 10);
 	m_frontRight.Config_kP(0, 20.46 / 2.0, 10);
-	m_frontRight.Config_kI(0, 20.46 / 2.0 / 1000.0 , 10);
+	m_frontRight.Config_kI(0, 0 , 10);
 	m_frontRight.Config_kD(0, 0, 10);
 
-
+	// Gains for high speed
 	m_frontLeft.Config_kF(1, 6.02, 10);
 	m_frontLeft.Config_kP(1, 6.02 / 2.0, 10);
-	m_frontLeft.Config_kI(1, 6.02 / 4.0 / 1000.0, 10);
+	m_frontRight.Config_kI(0, 0 , 10);
+	m_frontRight.Config_kD(0, 0, 10);
+
+	// Gains for high speed
+	m_frontLeft.Config_kF(1, 6.02, 10);
+	m_frontLeft.Config_kP(1, 6.02 / 2.0, 10);
+	m_frontLeft.Config_kI(1, 0, 10);
 	m_frontLeft.Config_kD(1, 0, 10);
 
 	m_frontRight.Config_kF(1, 8.525, 10);
 	m_frontRight.Config_kP(1, 8.525 / 2.0, 10);
-	m_frontRight.Config_kI(1, 8.525 / 4.0 / 1000.0, 10);
+	m_frontRight.Config_kI(1, 0, 10);
 	m_frontRight.Config_kD(1, 0, 10);
 
 	m_frontLeft.SetSensorPhase(true);
@@ -137,7 +144,7 @@ void DriveTrain::drive(InputState state) {
 	m_shiftFast.Set(buttonValue(state, "SHIFT_FAST"));
 	m_shiftSlow.Set(buttonValue(state, "SHIFT_SLOW"));
 
-	fast |= buttonValue(state, "SHIFT_FAST");
+	fast |=  buttonValue(state, "SHIFT_FAST");
 	fast &= !buttonValue(state, "SHIFT_SLOW");
 
 	percent = buttonValue(state, "TRIGGER");
@@ -203,15 +210,14 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 	static MovingAverage leftVelocityAverage(30);
 	static MovingAverage rightVelocityAverage(30);
 
-	const double leftVelocity = m_frontLeft.GetSelectedSensorVelocity(0);
+	const double leftVelocity  = m_frontLeft.GetSelectedSensorVelocity(0);
 	const double rightVelocity = m_frontRight.GetSelectedSensorVelocity(0);
 
-	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
-	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
+	frc::SmartDashboard::PutNumber("Left Side Set Speed", leftSpeed);
+	frc::SmartDashboard::PutNumber("Right Side Set Speed", rightSpeed);
 
 	frc::SmartDashboard::PutNumber("Left Side Velocity", leftVelocityAverage.Process(leftVelocity));
 	frc::SmartDashboard::PutNumber("Right Side Velocity", rightVelocityAverage.Process(rightVelocity));
-
 
 	frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(0));
 	frc::SmartDashboard::PutNumber("Right Side Error", m_frontLeft.GetClosedLoopError(0));

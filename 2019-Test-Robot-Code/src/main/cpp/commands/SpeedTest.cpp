@@ -2,8 +2,8 @@
 #include "Robot.h"
 #include "subsystems/DriveTrain.h"
 
-SpeedTest::SpeedTest(double speed) :
-    m_speed(speed),
+SpeedTest::SpeedTest(Input *input) :
+    m_input(input),
     Command("SpeedTest", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
 {
 
@@ -14,7 +14,7 @@ void SpeedTest::Initialize() {
 }
 
 void SpeedTest::Execute() {
-    Robot::m_driveTrain->drive(m_speed, m_speed);
+    Robot::m_driveTrain->drive(m_input->getInput().t, m_input->getInput().t);
 }
 
 bool SpeedTest::IsFinished() {
