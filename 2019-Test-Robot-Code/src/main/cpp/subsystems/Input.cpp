@@ -8,6 +8,7 @@
 #include "subsystems/Input.h"
 #include <SmartDashboard/SmartDashboard.h>
 #include <cmath>
+#include <frc/buttons/JoystickButton.h>
 
 // Checks SmartDashboard entry, returns true if button map is valid and usable
 static bool isValidMap(std::string buttonId) {
@@ -22,13 +23,23 @@ static bool isValidMap(std::string buttonId) {
 	return true;
 }
 
-bool buttonValue(InputState input, std::string buttonId) {
+std::size_t buttonIndex(const std::string& buttonId) {
 	if (isValidMap(buttonId)) {
 		double raw = frc::SmartDashboard::GetNumber(defaultButtonMap.at(buttonId).first, 0.0);
-		return input.buttons[static_cast< std::size_t >(raw)];
+		return static_cast< std::size_t >(raw);
 	}
 	else {
+		return 0;
+	}
+}
+
+bool buttonValue(InputState input, const std::string& buttonId) {
+	std::size_t index = buttonIndex(buttonId);
+	if (index == 0) {
 		return false;
+	}
+	else {
+		return input.buttons[index];
 	}
 }
 
@@ -53,6 +64,11 @@ Input::Input(int primaryPort, int secondaryPort) :
 		if (!isValidMap(button.first)) {
 			frc::SmartDashboard::PutNumber(button.second.first, button.second.second);
 		}
+	}
+
+	for (int i = 0; i < MAX_BUTTONS; ++i) {
+		// Arrays start at 0, button numbering starts at 1
+		buttons.push_back(std::make_unique< frc::JoystickButton >(&primary, i + 1));
 	}
 }
 
@@ -79,4 +95,15 @@ InputState Input::getInput() {
 	rawState.y = applyDeadzone(rawState.y, deadzone);
 
 	return rawState;
+}
+
+frc::Button *Input::getButton(const std::string& name) {
+	std::size_t index = buttonIndex(name);
+	if (index == 0) {
+		return nullptr;
+	}
+	else {
+		// Arrays start at 0, button numbering starts at 1
+		return buttons[index - 1].get();
+	}
 }

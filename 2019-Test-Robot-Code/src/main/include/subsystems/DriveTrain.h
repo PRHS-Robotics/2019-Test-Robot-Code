@@ -13,11 +13,15 @@
 #include <memory>
 
 #include <ctre/Phoenix.h>
-#include <SpeedControllerGroup.h>
-#include <Drive/DifferentialDrive.h>
-#include <Solenoid.h>
+#include <frc/Solenoid.h>
+#include <frc/commands/Subsystem.h>
 
-class DriveTrain {
+#include "commands/ApproachCargo.h"
+#include "commands/ManualControl.h"
+#include "commands/SpeedTest.h"
+#include "commands/FollowPath.h"
+
+class DriveTrain : public frc::Subsystem {
 public:
 
 	DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight);
@@ -26,7 +30,16 @@ public:
 
 	void drive(double leftSpeed, double rightSpeed);
 
+	std::pair< int, int > getEncoderPositions();
+
 	void resetSensors();
+
+	void InitDefaultCommand() override;
+
+	std::unique_ptr< ManualControl > m_manualControl;
+	std::unique_ptr< ApproachCargo > m_approachCargo;
+	std::unique_ptr< SpeedTest > m_speedTest;
+	std::unique_ptr< FollowPath > m_followPath;
 
 private:
 
