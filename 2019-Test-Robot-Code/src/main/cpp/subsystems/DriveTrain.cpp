@@ -89,30 +89,24 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 	}
 
 	// Gains for low speed
-	m_frontLeft.Config_kF(0, 20.46 * 65.0 / 70.0, 10);
-	m_frontLeft.Config_kP(0, 20.46 * 65.0 / 70.0 / 2.0, 10);
+	m_frontLeft.Config_kF(0, 16.771, 10);
+	m_frontLeft.Config_kP(0, 16.771 / 2.0, 10);
 	m_frontLeft.Config_kI(0, 0, 10);
 	m_frontLeft.Config_kD(0, 0, 10);
 
-	m_frontRight.Config_kF(0, 20.46, 10);
-	m_frontRight.Config_kP(0, 20.46 / 2.0, 10);
+	m_frontRight.Config_kF(0, 16.119, 10);
+	m_frontRight.Config_kP(0, 16.119 / 2.0, 10);
 	m_frontRight.Config_kI(0, 0 , 10);
 	m_frontRight.Config_kD(0, 0, 10);
 
 	// Gains for high speed
-	m_frontLeft.Config_kF(1, 6.02, 10);
-	m_frontLeft.Config_kP(1, 6.02 / 2.0, 10);
-	m_frontRight.Config_kI(0, 0 , 10);
-	m_frontRight.Config_kD(0, 0, 10);
-
-	// Gains for high speed
-	m_frontLeft.Config_kF(1, 6.02, 10);
-	m_frontLeft.Config_kP(1, 6.02 / 2.0, 10);
+	m_frontLeft.Config_kF(1, 6.6, 10);
+	m_frontLeft.Config_kP(1, 6.6 / 2.0, 10);
 	m_frontLeft.Config_kI(1, 0, 10);
 	m_frontLeft.Config_kD(1, 0, 10);
 
-	m_frontRight.Config_kF(1, 8.525, 10);
-	m_frontRight.Config_kP(1, 8.525 / 2.0, 10);
+	m_frontRight.Config_kF(1, 6.2, 10);
+	m_frontRight.Config_kP(1, 6.2 / 2.0, 10);
 	m_frontRight.Config_kI(1, 0, 10);
 	m_frontRight.Config_kD(1, 0, 10);
 
@@ -183,10 +177,10 @@ void DriveTrain::calibratePhase(double leftSpeed, double rightSpeed) {
 	}
 }
 
-void DriveTrain::drive(double leftSpeed, double rightSpeed) {
+void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) {
 	calibratePhase(leftSpeed, rightSpeed);
 
-	if (percent) {
+	if (percentOutput) {
 		m_frontLeft.Set(ControlMode::PercentOutput, leftSpeed);
 		m_frontRight.Set(ControlMode::PercentOutput, rightSpeed);
 	}
@@ -195,15 +189,15 @@ void DriveTrain::drive(double leftSpeed, double rightSpeed) {
 			m_frontLeft.SelectProfileSlot(1, 0);
 			m_frontRight.SelectProfileSlot(1, 0);
 
-			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 100.0);
-			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 100.0);
+			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 140.0);
+			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 140.0);
 		}
 		else {
 			m_frontLeft.SelectProfileSlot(0, 0);
 			m_frontRight.SelectProfileSlot(0, 0);
 
-			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 35.0);
-			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 35.0);
+			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 50.0);
+			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 50.0);
 		}
 	}
 

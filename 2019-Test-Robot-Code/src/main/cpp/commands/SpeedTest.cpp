@@ -14,7 +14,7 @@ void SpeedTest::Initialize() {
 }
 
 void SpeedTest::Execute() {
-    Robot::m_driveTrain->drive(m_input->getInput().t, m_input->getInput().t);
+    Robot::m_driveTrain->drive(m_input->getInput().t, m_input->getInput().t, buttonValue(m_input->getInput(), "TRIGGER"));
 }
 
 bool SpeedTest::IsFinished() {

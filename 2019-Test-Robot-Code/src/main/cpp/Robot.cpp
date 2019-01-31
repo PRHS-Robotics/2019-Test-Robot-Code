@@ -89,7 +89,7 @@ void Robot::RobotInit() {
 		{ 0.0, 3.0, 0.0 }
 	};
 
-	m_gyro = std::make_unique< PigeonIMU >(0);
+	m_gyro = std::make_unique< PigeonIMU >(8);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
@@ -98,7 +98,7 @@ void Robot::RobotInit() {
 	//m_calculation = std::make_unique< std::thread >(f, waypoints);
 
 	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
-	camser->StartAutomaticCapture();*/
+	camser->StartAm_gyro->GetYawPitchRoll(ypr)utomaticCapture();*/
 
 	frc::SmartDashboard::init();
 
@@ -169,6 +169,10 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
+
+	double ypr[3];
+	m_gyro->GetYawPitchRoll(ypr);
+	frc::SmartDashboard::PutNumber("Gyro Yaw", ypr[0]);
 
 	frc::Scheduler::GetInstance()->Run();
 
