@@ -95,7 +95,7 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
-	//m_calculation = std::make_unique< std::thread >(f, waypoints);
+	m_calculation = std::make_unique< std::thread >(f, waypoints);
 
 	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
 	camser->StartAm_gyro->GetYawPitchRoll(ypr)utomaticCapture();*/
@@ -127,7 +127,14 @@ void Robot::AutonomousInit() {
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
+		
+	if (!m_followPath) {
+		m_followPath = std::make_unique< FollowPath >(pathresult.first, pathresult.second);
+	}
 
+	if (m_followPath) {
+		m_followPath->Start();
+	}
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -137,7 +144,7 @@ void Robot::AutonomousInit() {
 }
 
 void Robot::AutonomousPeriodic() {
-	m_driveTrain->drive(0.0, 0.0);
+	frc::Scheduler::GetInstance()->Run();
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -177,7 +184,7 @@ void Robot::TeleopPeriodic() {
 	frc::Scheduler::GetInstance()->Run();
 
 	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
-		auto result = m_arduino->readData();
+		auto result = m_arduino->readData(false);
 		if (result.second) {
 			SensorFrame data = result.first;
 			std::cout << "Degrees: " << data.degrees << "\n";

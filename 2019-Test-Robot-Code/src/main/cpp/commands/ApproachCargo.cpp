@@ -1,5 +1,6 @@
 #include "commands/ApproachCargo.h"
 #include "subsystems/DriveTrain.h"
+#include "subsystems/ArduinoInterface.h"
 #include "Robot.h"
 
 #include <networktables/NetworkTableEntry.h>
