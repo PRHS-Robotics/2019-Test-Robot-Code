@@ -23,6 +23,7 @@ char printBuffer[BUFFER_SIZE];
 struct RxFrame {
   static constexpr const uint32_t magic_number = 0xAA55FAF5;
   uint32_t verification = 0;
+  uint8_t light = 0;
 };
 
 RxFrame receivedFrame;
@@ -95,6 +96,8 @@ void receiveEvent(int bytes) {
     }
     Serial.println("");
     memcpy(reinterpret_cast< void* >(&receivedFrame), data, sizeof(RxFrame));
+
+    digitalWrite(10, receivedFrame.light);
   }
 }
 

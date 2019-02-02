@@ -17,6 +17,7 @@ ApproachCargo::ApproachCargo(int yawSamples) :
 
 void ApproachCargo::Initialize() {
     m_lastDetected = false;
+	Robot::m_arduino->readData(true);
 }
 
 void ApproachCargo::Execute() {
@@ -62,6 +63,7 @@ bool ApproachCargo::IsFinished() {
 
 void ApproachCargo::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
+	Robot::m_arduino->readData(false);
 }
 
 void ApproachCargo::Interrupted() {

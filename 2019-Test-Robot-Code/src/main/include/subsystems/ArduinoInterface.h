@@ -24,7 +24,7 @@ public:
 	Arduino(Arduino&&) = default;
 
 	// If the boolean value is false, the data is invalid
-	std::pair< SensorFrame, bool > readData();
+	std::pair< SensorFrame, bool > readData(bool light);
 
 	bool handshake();
 
@@ -41,9 +41,10 @@ private:
 	struct TxFrame {
 		static constexpr const uint32_t magic_number = 0xAA55FAF5;
 		uint32_t verification = magic_number; // The Arduino should return an invalid RxFrame if this is not equal to 0xAA55FAF5
+		uint8_t light = 0;
 	};
 
-	RxFrame readRawData();
+	RxFrame readRawData(bool light);
 
 	static constexpr const int address = 80;
 
