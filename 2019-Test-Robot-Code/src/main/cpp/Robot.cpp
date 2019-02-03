@@ -42,6 +42,7 @@ std::unique_ptr< std::thread > Robot::m_calculation{};
 
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
+std::unique_ptr< ApproachTape > Robot::m_approachTape{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
@@ -52,7 +53,7 @@ void Robot::RobotInit() {
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
 
-	m_driveTrain = std::make_unique< DriveTrain >(1, 2, 3, 4, 5, 6);
+	m_driveTrain = std::make_unique< DriveTrain >(6, 5, 4, 1, 2, 3);
 
 	m_input = std::make_unique< Input >(1, 2);
 
@@ -93,6 +94,7 @@ void Robot::RobotInit() {
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
+	m_approachTape = std::make_unique< ApproachTape >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);

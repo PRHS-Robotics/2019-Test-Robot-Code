@@ -1,4 +1,4 @@
-#include "commands/ApproachCargo.h"
+#include "commands/ApproachTape.h"
 #include "subsystems/DriveTrain.h"
 #include "subsystems/ArduinoInterface.h"
 #include "Robot.h"
@@ -8,25 +8,25 @@
 
 #include <iostream>
 
-ApproachCargo::ApproachCargo(int yawSamples) :
+ApproachTape::ApproachTape(int yawSamples) :
     m_yawSamples(yawSamples),
     m_yawAverager(m_yawSamples),
-    frc::Command("ApproachCargo", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
+    frc::Command("ApproachTape", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
 {
 
 }
 
-void ApproachCargo::Initialize() {
+void ApproachTape::Initialize() {
     m_lastDetected = false;
 	Robot::m_arduino->readData(true);
 }
 
-void ApproachCargo::Execute() {
+void ApproachTape::Execute() {
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
 
-	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
-	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
+	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
+	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
 
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
@@ -57,16 +57,16 @@ void ApproachCargo::Execute() {
 	}
 }
 
-bool ApproachCargo::IsFinished() {
-    // TODO: Determine when close enough to cargo
+bool ApproachTape::IsFinished() {
+    // TODO: Determine when close enough to tape
     return false;
 }
 
-void ApproachCargo::End() {
+void ApproachTape::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
 	Robot::m_arduino->readData(false);
 }
 
-void ApproachCargo::Interrupted() {
+void ApproachTape::Interrupted() {
     End();
 }
