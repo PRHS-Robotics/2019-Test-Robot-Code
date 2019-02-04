@@ -57,10 +57,10 @@ void Robot::RobotInit() {
 
 	m_input = std::make_unique< Input >(1, 2);
 
-	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
+	/*m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
 	if (m_serialPort && m_serialPort->StatusIsFatal()) {
 		m_serialPort = nullptr;
-	}
+	}*/
 
 	m_arduino = std::make_unique< Arduino >();
 
@@ -93,8 +93,8 @@ void Robot::RobotInit() {
 	m_gyro = std::make_unique< PigeonIMU >(8);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
-	m_approachCargo = std::make_unique< ApproachCargo >(10);
-	m_approachTape = std::make_unique< ApproachTape >(10);
+	m_approachCargo = std::make_unique< ApproachCargo >(5);
+	m_approachTape = std::make_unique< ApproachTape >(5);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
@@ -110,6 +110,7 @@ void Robot::RobotInit() {
 	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
 	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
 	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
+	m_input->getButton("FIND_TAPE")->WhenPressed(m_approachTape.get());
 }
 
 /**
@@ -160,6 +161,8 @@ void Robot::TeleopInit() {
 
 	m_driveTrain->resetSensors();
 
+	std::cout << "Doing handshake\n";
+
 	if(m_arduino->handshake()) {
 		std::cout << "Successfully communicated with Arduino\n";
 	}
@@ -170,9 +173,9 @@ void Robot::TeleopInit() {
 	//m_calculation->join();
 
 
-	for (auto& point : pathresult.first) {
+	/*for (auto& point : pathresult.first) {
 		std::cout << "Time: " << point.dt << "\n";
-	}	
+	}*/	
 }
 
 void Robot::TeleopPeriodic() {
@@ -185,7 +188,7 @@ void Robot::TeleopPeriodic() {
 
 	frc::Scheduler::GetInstance()->Run();
 
-	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
+	/*if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
 		auto result = m_arduino->readData(false);
 		if (result.second) {
 			SensorFrame data = result.first;
@@ -199,7 +202,7 @@ void Robot::TeleopPeriodic() {
 			}
 			std::cout << "\n";
 		}
-	}
+	}*/
 }
 
 void Robot::TestPeriodic() {}

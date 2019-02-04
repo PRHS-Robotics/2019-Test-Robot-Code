@@ -18,7 +18,13 @@ ApproachCargo::ApproachCargo(int yawSamples) :
 
 void ApproachCargo::Initialize() {
     m_lastDetected = false;
-	Robot::m_arduino->readData(true);
+	Robot::m_arduino->readData(false);
+
+	auto ntinstance = nt::NetworkTableInstance::GetDefault();
+	auto table = ntinstance.GetTable("ChickenVision");
+
+	nt::NetworkTableEntry useTape = table->GetEntry("Tape");
+	useTape.SetBoolean(false);
 }
 
 void ApproachCargo::Execute() {
@@ -28,13 +34,14 @@ void ApproachCargo::Execute() {
 	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
 
+	frc::SmartDashboard::PutNumber("Cargo Contours", table->GetEntry("cargoContours").GetDouble(0.0));
+
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
 		double yawValue = yaw.GetDouble(0.0);
 
-		const int SAMPLES = 10;
-		static MovingAverage yawAverager(SAMPLES);
+		static MovingAverage yawAverager(m_yawSamples);
 
 		if (detected.GetBoolean(false) && !m_lastDetected) {
 			yawAverager.Clear();

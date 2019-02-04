@@ -24,7 +24,8 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
 		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
 		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
-		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } }
+		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
+		{ "FIND_TAPE", { "FIND_TAPE", 10 }}
 };
 
 constexpr const std::size_t MAX_BUTTONS = 11;
@@ -60,7 +61,7 @@ private:
 	frc::Joystick primary;
 	frc::XboxController secondary;
 
-	constexpr const static double deadzone = 0.15;
+	constexpr const static double deadzone = 0.2;
 };
 
 

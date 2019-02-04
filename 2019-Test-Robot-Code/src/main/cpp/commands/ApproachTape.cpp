@@ -19,6 +19,13 @@ ApproachTape::ApproachTape(int yawSamples) :
 void ApproachTape::Initialize() {
     m_lastDetected = false;
 	Robot::m_arduino->readData(true);
+
+	auto ntinstance = nt::NetworkTableInstance::GetDefault();
+	auto table = ntinstance.GetTable("ChickenVision");
+
+	nt::NetworkTableEntry useTape = table->GetEntry("Tape");
+	useTape.SetBoolean(true);
+	
 }
 
 void ApproachTape::Execute() {
@@ -28,13 +35,14 @@ void ApproachTape::Execute() {
 	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
 
+	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
+
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
 		double yawValue = yaw.GetDouble(0.0);
 
-		const int SAMPLES = 10;
-		static MovingAverage yawAverager(SAMPLES);
+		static MovingAverage yawAverager(m_yawSamples);
 
 		if (detected.GetBoolean(false) && !m_lastDetected) {
 			yawAverager.Clear();
