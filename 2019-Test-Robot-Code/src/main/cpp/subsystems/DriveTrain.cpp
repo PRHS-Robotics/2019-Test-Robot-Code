@@ -10,6 +10,7 @@
 #include <iostream>
 #include <algorithm>
 #include <SmartDashboard/SmartDashboard.h>
+#include <frc/commands/Scheduler.h>
 
 bool DriveTrain::leftSidePhase() const {
 	return frc::SmartDashboard::GetBoolean("Left Sensor Phase", false);
@@ -19,7 +20,9 @@ void DriveTrain::setLeftSidePhase(bool phase) {
 	frc::SmartDashboard::SetPersistent("Left Sensor Phase");
 	frc::SmartDashboard::PutBoolean("Left Sensor Phase", phase);
 
-	m_frontLeft.SetSensorPhase(phase);
+	for (auto& talon : m_lMotors) {
+		talon->SetSensorPhase(phase);
+	}
 }
 
 bool DriveTrain::rightSidePhase() const {
@@ -30,23 +33,26 @@ void DriveTrain::setRightSidePhase(bool phase) {
 	frc::SmartDashboard::SetPersistent("Right Sensor Phase");
 	frc::SmartDashboard::PutBoolean("Right Sensor Phase", phase);
 
-	m_frontRight.SetSensorPhase(phase);
+	for (auto& talon : m_rMotors) {
+		talon->SetSensorPhase(phase);
+	}
 }
 
-std::pair< int, int > DriveTrain::getEncoderPositions() {
-	return { m_frontLeft.GetSelectedSensorPosition(), m_frontRight.GetSelectedSensorPosition() };
+std::pair< std::array< int, 3 >, std::array< int, 3 > > DriveTrain::getEncoderPositions() {
+	std::array< int, 3 > lPositions;
+	std::array< int, 3 > rPositions;
+	for (int i = 0; i < 3; ++i) {
+		lPositions[i] = m_lMotors[i]->GetSelectedSensorPosition();
+		rPositions[i] = m_rMotors[i]->GetSelectedSensorPosition();
+	}
+	return { lPositions, rPositions };
 }
+
+#define M(X) std::make_unique< WPI_TalonSRX >(X)
 
 DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight, int midRight, int backRight) :
-	m_frontLeft(frontLeft),
-	m_midLeft(midLeft),
-	m_backLeft(backLeft),
-	m_frontRight(frontRight),
-	m_midRight(midRight),
-	m_backRight(backRight),
-	m_arm(7),
-	m_shiftFast(0),
-	m_shiftSlow(1),
+	m_lMotors{ M(frontLeft), M(midLeft), M(backLeft) },
+	m_rMotors{ M(frontRight), M(midRight), M(backRight) },
 	Subsystem("DriveTrain")
 {
 	if (!frc::SmartDashboard::SetDefaultBoolean("Left Sensor Phase", false)) {
@@ -66,51 +72,51 @@ DriveTrain::DriveTrain(int frontLeft, int midLeft, int backLeft, int frontRight,
 		setRightSidePhase(false);
 	}
 
-	m_midLeft.Follow(m_frontLeft);
-	m_backLeft.Follow(m_frontLeft);
-
-	m_midRight.Follow(m_frontRight);
-	m_backRight.Follow(m_frontRight);
-
-	m_frontLeft.SetInverted(true);
-	m_midLeft.SetInverted(true);
-	m_backLeft.SetInverted(true);
-
-	// Configure both front left and front right talons identically
-	std::array< WPI_TalonSRX*, 2 > talons = { &m_frontLeft, &m_frontRight };
-	for (int i = 0; i < 2; ++i) {
-		talons[i]->ConfigNominalOutputForward(0, 10);
-		talons[i]->ConfigNominalOutputReverse(0, 10);
-		talons[i]->ConfigPeakOutputForward(1, 10);
-		talons[i]->ConfigPeakOutputReverse(-1, 10);
-
-		talons[i]->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
-		talons[i]->ConfigClosedloopRamp(0.0, 10);
+	for (auto& motor : m_lMotors) {
+		motor->SetInverted(true);
 	}
 
-	m_frontLeft.Config_kF(0, 0.0779131, 10);
-	m_frontLeft.Config_kP(0, 0.07, 10);
-	m_frontLeft.Config_kI(0, 0.0, 10);
+	/*
+	for (int i = 0; i < 3; ++i) {
+		m_lMotors[i].SetInverted(true);
+	}
+	*/
+
+	// Configure both front left and front right talons identically
+
+	for (auto& talon : m_lMotors) {
+		talon->ConfigNominalOutputForward(0, 10);
+		talon->ConfigNominalOutputReverse(0, 10);
+		talon->ConfigPeakOutputForward(1, 10);
+		talon->ConfigPeakOutputReverse(-1, 10);
+
+		talon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
+		talon->ConfigClosedloopRamp(0.0, 10);
+	}
+	for (auto& talon : m_rMotors) {
+		talon->ConfigNominalOutputForward(0, 10);
+		talon->ConfigNominalOutputReverse(0, 10);
+		talon->ConfigPeakOutputForward(1, 10);
+		talon->ConfigPeakOutputReverse(-1, 10);
+
+		talon->ConfigSelectedFeedbackSensor(FeedbackDevice::QuadEncoder, 0, 10);
+		talon->ConfigClosedloopRamp(0.0, 10);
+	}
+
+	/*
+	m_frontLeft.Config_kF(0, 16.771, 10);
+	m_frontLeft.Config_kP(0, 16.771 / 2.0, 10);
+	m_frontLeft.Config_kI(0, 0, 10);
 	m_frontLeft.Config_kD(0, 0, 10);
 
-	m_frontRight.Config_kF(0, 0.0905309, 10);
-	m_frontRight.Config_kP(0, 0.09, 10);
+	m_frontRight.Config_kF(0, 16.119, 10);
+	m_frontRight.Config_kP(0, 16.119 / 2.0, 10);
 	m_frontRight.Config_kI(0, 0 , 10);
 	m_frontRight.Config_kD(0, 0, 10);
-
-
-	m_frontLeft.Config_kF(1, 0.0300882, 10);
-	m_frontLeft.Config_kP(1, 0.03, 10);
-	m_frontLeft.Config_kI(1, 0.0, 10);
-	m_frontLeft.Config_kD(1, 0, 10);
-
-	m_frontRight.Config_kF(1, 0.0343288, 10);
-	m_frontRight.Config_kP(1, 0.03, 10);
-	m_frontRight.Config_kI(1, 0.0, 10);
-	m_frontRight.Config_kD(1, 0, 10);
-
-	m_frontLeft.SetSensorPhase(false);
-	m_frontRight.SetSensorPhase(false);
+	
+	m_frontLeft.SetSensorPhase(true);
+	m_frontRight.SetSensorPhase(true);
+	*/
 
 	frc::Scheduler::GetInstance()->RegisterSubsystem(this);
 }
@@ -120,11 +126,13 @@ void DriveTrain::InitDefaultCommand() {
 }
 
 void DriveTrain::resetSensors() {
-	m_frontLeft.SetSelectedSensorPosition(0, 0, 10);
-	m_frontRight.SetSelectedSensorPosition(0, 0, 10);
+	for (auto& talon : m_lMotors) {
+		talon->SetSelectedSensorPosition(0, 0, 10);
+	}
+	for (auto& talon : m_rMotors) {
+		talon->SetSelectedSensorPosition(0, 0, 10);
+	}
 }
-
-bool fast = false;
 
 void DriveTrain::drive(InputState state) {
 	double lSpeed = -state.y + state.r;
@@ -132,13 +140,7 @@ void DriveTrain::drive(InputState state) {
 	lSpeed = std::max(std::min(lSpeed, 1.0), -1.0);
 	rSpeed = std::max(std::min(rSpeed, 1.0), -1.0);
 
-	m_shiftFast.Set(buttonValue(state, "SHIFT_FAST"));
-	m_shiftSlow.Set(buttonValue(state, "SHIFT_SLOW"));
-
-	fast |= buttonValue(state, "SHIFT_FAST");
-	fast &= !buttonValue(state, "SHIFT_SLOW");
-
-	drive(lSpeed, rSpeed, buttonValue(state, "TRIGGER"));
+	drive(lSpeed, rSpeed, !buttonValue(state, "TRIGGER"));
 }
 
 template < typename T >
@@ -146,7 +148,7 @@ int signum(const T& value) {
 	return (value > 0) - (value < 0);
 }
 
-void DriveTrain::calibratePhase(double leftSpeed, double rightSpeed) {
+/*void DriveTrain::calibratePhase(double leftSpeed, double rightSpeed) {
 	// Allow time for measured velocity to change after inverting a phase
 	static int debounce = 0;
 
@@ -170,45 +172,46 @@ void DriveTrain::calibratePhase(double leftSpeed, double rightSpeed) {
 		setRightSidePhase(!currentPhase);
 		debounce = 1000;
 	}
-}
+}*/
 
-void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percent) {
+void DriveTrain::drive(double leftSpeed, double rightSpeed, bool percentOutput) {
 	//calibratePhase(leftSpeed, rightSpeed);
 
-	if (percent) {
-		m_frontLeft.Set(ControlMode::PercentOutput, leftSpeed);
-		m_frontRight.Set(ControlMode::PercentOutput, rightSpeed);
+	const double MAX_SPEED = 50.0;
+	
+	const double MAX_PERCENT = 0.5;
+
+	if (percentOutput) {
+		for (auto& motor : m_lMotors) {
+			motor->Set(ControlMode::PercentOutput, leftSpeed * MAX_PERCENT);
+		}
+		for (auto& motor : m_rMotors) {
+			motor->Set(ControlMode::PercentOutput, rightSpeed * MAX_PERCENT);
+		}
 	}
 	else {
-		if (fast) {
-			m_frontLeft.SelectProfileSlot(1, 0);
-			m_frontRight.SelectProfileSlot(1, 0);
-
-			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 28000.0);
-			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 28000.0);
+		for (auto& motor : m_lMotors) {
+			motor->Set(ControlMode::Velocity, leftSpeed * MAX_SPEED);
 		}
-		else {
-			m_frontLeft.SelectProfileSlot(0, 0);
-			m_frontRight.SelectProfileSlot(0, 0);
-
-			m_frontLeft.Set(ControlMode::Velocity, leftSpeed * 10000.0);
-			m_frontRight.Set(ControlMode::Velocity, rightSpeed * 10000.0);
+		for (auto& motor : m_rMotors) {
+			motor->Set(ControlMode::Velocity, rightSpeed * MAX_SPEED);
 		}
 	}
 
-	static MovingAverage leftVelocityAverage(30);
-	static MovingAverage rightVelocityAverage(30);
+	static std::array< MovingAverage, 3 > lVelocity{ MovingAverage{30}, {30}, {30} };
+	static std::array< MovingAverage, 3 > rVelocity{ MovingAverage{30}, {30}, {30} };
+	for (int i = 0; i < 3; ++i) {
+		std::string lKey = "Left Side Velocity " + i;
+		std::string rKey = "Right Side Velocity " + i;
+		double lValue = m_lMotors[i]->GetSelectedSensorVelocity(0);
+		double rValue = m_rMotors[i]->GetSelectedSensorVelocity(0);
+		frc::SmartDashboard::PutNumber(lKey, lVelocity[i].Process(lValue));
+		frc::SmartDashboard::PutNumber(rKey, rVelocity[i].Process(rValue));
+	}
 
-	const double leftVelocity = m_frontLeft.GetSelectedSensorVelocity(0);
-	const double rightVelocity = m_frontRight.GetSelectedSensorVelocity(0);
+	frc::SmartDashboard::PutNumber("Left Side Set Speed", leftSpeed);
+	frc::SmartDashboard::PutNumber("Right Side Set Speed", rightSpeed);
 
-	frc::SmartDashboard::PutNumber("Left Side Speed", leftSpeed);
-	frc::SmartDashboard::PutNumber("Right Side Speed", rightSpeed);
-
-	frc::SmartDashboard::PutNumber("Left Side Velocity", leftVelocityAverage.Process(leftVelocity));
-	frc::SmartDashboard::PutNumber("Right Side Velocity", rightVelocityAverage.Process(rightVelocity));
-
-
-	frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(fast));
-	frc::SmartDashboard::PutNumber("Right Side Error", m_frontRight.GetClosedLoopError(fast));
+	//frc::SmartDashboard::PutNumber("Left Side Error", m_frontLeft.GetClosedLoopError(0));
+	//frc::SmartDashboard::PutNumber("Right Side Error", m_frontLeft.GetClosedLoopError(0));
 }

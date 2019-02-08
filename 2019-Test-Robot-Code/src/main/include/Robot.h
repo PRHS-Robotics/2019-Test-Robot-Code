@@ -7,61 +7,43 @@
 
 #pragma once
 
-#include <memory>
+#include "subsystems/DriveTrain.h"
+#include "subsystems/Input.h"
+#include "subsystems/Arm.h"
 
 #include <string>
-#include <thread>
+#include <memory>
 
 #include <frc/TimedRobot.h>
 #include <frc/smartdashboard/SendableChooser.h>
-#include <frc/SerialPort.h>
-#include <frc/AnalogInput.h>
-#include <frc/Compressor.h>
-#include <frc/commands/Scheduler.h>
-#include <frc/smartdashboard/SmartDashboard.h>
-#include <cameraserver/CameraServer.h>
-#include <networktables/NetworkTable.h>
-
 
 #include "commands/ApproachCargo.h"
-#include "commands/ApproachTape.h"
+#include "commands/FollowPath.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
-#include "commands/FollowPath.h"
-
-class DriveTrain;
-class Input;
-class Autonomous;
-class Arduino;
+#include "commands/ManualArm.h"
 
 class Robot : public frc::TimedRobot {
-public:
-	void RobotInit() override;
-	void AutonomousInit() override;
-	void AutonomousPeriodic() override;
-	void TeleopInit() override;
-	void TeleopPeriodic() override;
-	void TestPeriodic() override;
+ public:
+  void RobotInit() override;
+  void RobotPeriodic() override;
+  void AutonomousInit() override;
+  void AutonomousPeriodic() override;
+  void TeleopInit() override;
+  void TeleopPeriodic() override;
+  void TestPeriodic() override;
+  
+  std::string m_autoSelected;
 
-	frc::SendableChooser<std::string> m_chooser;
-	const std::string kAutoNameDefault = "Default";
-	const std::string kAutoNameCustom = "My Auto";
-	std::string m_autoSelected;
-
-	static std::unique_ptr< DriveTrain > m_driveTrain;
-	static std::unique_ptr< Input > m_input;
-	//static std::unique_ptr< Autonomous > m_autonomous;
-	static std::unique_ptr< Arduino > m_arduino;
-	static std::unique_ptr< frc::SerialPort > m_serialPort;
-	static std::unique_ptr< frc::AnalogInput > m_analogInput;
-	static std::unique_ptr< frc::Compressor > m_compressor;
-	static std::unique_ptr< std::thread > m_calculation;
-	static std::unique_ptr< PigeonIMU > m_gyro;
+  static std::unique_ptr< DriveTrain > m_driveTrain;
+  static std::unique_ptr< Input > m_input;
 
 	static std::unique_ptr< ManualControl > m_manualControl;
 	static std::unique_ptr< ApproachCargo > m_approachCargo;
-	static std::unique_ptr< ApproachTape > m_approachTape;
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
 
+  static std::unique_ptr< Arm > m_arm;
+
+  static std::unique_ptr< ManualArm > m_manualArm;
 };

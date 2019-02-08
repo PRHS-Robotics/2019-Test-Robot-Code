@@ -1,10 +1,11 @@
 #include "commands/ApproachCargo.h"
 #include "subsystems/DriveTrain.h"
-#include "subsystems/ArduinoInterface.h"
 #include "Robot.h"
 
 #include <networktables/NetworkTableEntry.h>
 #include <networktables/NetworkTableInstance.h>
+
+#include <frc/smartdashboard/SmartDashboard.h>
 
 #include <iostream>
 
@@ -18,43 +19,45 @@ ApproachCargo::ApproachCargo(int yawSamples) :
 
 void ApproachCargo::Initialize() {
     m_lastDetected = false;
-	Robot::m_arduino->readData(true);
 }
 
 void ApproachCargo::Execute() {
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
 
-	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
-	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
+	nt::NetworkTableEntry detectedEntry = table->GetEntry("cargoDetected");
+	nt::NetworkTableEntry yawEntry = table->GetEntry("cargoYaw");
 
-    if (detected.GetBoolean(false)) {
-		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
+	bool detected = detectedEntry.GetBoolean(false);
+	int yaw = detectedEntry.GetDouble(0.0);
 
-		double yawValue = yaw.GetDouble(0.0);
+    if (detected) {
+		std::cout << "Yaw: " << yaw << "\n";
 
-		const int SAMPLES = 10;
+		double yawValue = yaw;
+
+		const int SAMPLES = 2;
 		static MovingAverage yawAverager(SAMPLES);
 
-		if (detected.GetBoolean(false) && !m_lastDetected) {
+		if (!m_lastDetected) {
 			yawAverager.Clear();
 		}
 
-		m_lastDetected = detected.GetBoolean(false);
-
 		double speed = 0.0;
 
-		double yawAverage = yawAverager.Process(yawValue);
+		double yawTarget = yawAverager.Process(yawValue);
 
-		if (yawAverage > -10 && yawAverage < 10) {
-			speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
+		if (yawTarget > -10 && yawTarget < 10) {
+			speed = (1.0 - std::abs(yawTarget / 10.0)) * 0.2;
 		}
 
-		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
+		frc::SmartDashboard::PutNumber("Average Yaw", yawTarget);
 
 		// TODO: Add gradual ramp-up
-		Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
+		Robot::m_driveTrain->drive(yawTarget / 30.0 + speed, -yawTarget / 30.0 + speed);
 	}
+
+	m_lastDetected = detected;
 }
 
 bool ApproachCargo::IsFinished() {
@@ -64,7 +67,6 @@ bool ApproachCargo::IsFinished() {
 
 void ApproachCargo::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
-	Robot::m_arduino->readData(false);
 }
 
 void ApproachCargo::Interrupted() {

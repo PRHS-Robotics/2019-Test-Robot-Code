@@ -7,109 +7,49 @@
 
 #include "Robot.h"
 
-#include "subsystems/DriveTrain.h"
-#include "subsystems/Input.h"
-#include "subsystems/Autonomous.h"
-#include "subsystems/ArduinoInterface.h"
-
 #include <iostream>
 
-#include <SmartDashboard/SmartDashboard.h>
-
-#include <frc/Timer.h>
-
-#include <thread>
-
-int main(int argc, char *argv[]) {
-	frc::StartRobot< Robot >();
-}
-
-std::pair< std::vector< Segment >, std::vector< Segment > > pathresult;
-
-auto f = [](std::vector< Waypoint > waypoints) {
-	pathresult = generateTrajectory(waypoints);
-};
-
+#include <frc/smartdashboard/SmartDashboard.h>
+#include <frc/commands/Scheduler.h>
 
 std::unique_ptr< DriveTrain > Robot::m_driveTrain{};
 std::unique_ptr< Input > Robot::m_input{};
-//std::unique_ptr< Autonomous > Robot::m_autonomous{};
-std::unique_ptr< Arduino > Robot::m_arduino{};
-std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
-std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
-std::unique_ptr< frc::Compressor > Robot::m_compressor{};
-std::unique_ptr< std::thread > Robot::m_calculation{};
 
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
-std::unique_ptr< ApproachTape > Robot::m_approachTape{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
-std::unique_ptr< PigeonIMU > Robot::m_gyro{};
+std::unique_ptr< Arm > Robot::m_arm{};
+
+std::unique_ptr< ManualArm > Robot::m_manualArm{};
 
 void Robot::RobotInit() {
-	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
-	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
-	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-
-	m_driveTrain = std::make_unique< DriveTrain >(6, 5, 4, 1, 2, 3);
-
-	m_input = std::make_unique< Input >(1, 2);
-
-	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
-	if (m_serialPort && m_serialPort->StatusIsFatal()) {
-		m_serialPort = nullptr;
-	}
-
-	m_arduino = std::make_unique< Arduino >();
-
-	m_analogInput = std::make_unique< frc::AnalogInput >(0);
-	if (m_analogInput) {
-		if (m_analogInput->StatusIsFatal()) {
-			m_analogInput = nullptr;
-		}
-		else {
-			m_analogInput->SetSampleRate(62500);
-			m_analogInput->SetAverageBits(12);
-		}
-	}
-
-	m_compressor = std::make_unique< frc::Compressor >();
-	if (m_compressor) {
-		if (m_compressor->StatusIsFatal()) {
-			m_compressor = nullptr;
-		}
-		else {
-			m_compressor->Start();
-		}
-	}
-
-	std::vector< Waypoint > waypoints = {
-		{ 0.0, 1.0, 0.0 },
-		{ 0.0, 3.0, 0.0 }
-	};
-
-	m_gyro = std::make_unique< PigeonIMU >(8);
+  m_driveTrain = std::make_unique< DriveTrain >(3, 5, 7, 4, 6, 8);
+  m_input = std::make_unique< Input >(1, 2);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
-	m_approachTape = std::make_unique< ApproachTape >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
-	m_calculation = std::make_unique< std::thread >(f, waypoints);
+  m_arm = std::make_unique< Arm >(1, 0, 2, 1);
 
-	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
-	camser->StartAm_gyro->GetYawPitchRoll(ypr)utomaticCapture();*/
+  m_manualArm = std::make_unique< ManualArm >(Robot::m_input.get());
+}
 
-	frc::SmartDashboard::init();
+/**
+ * This function is called every robot packet, no matter the mode. Use
+ * this for items like diagnostics that you want ran during disabled,
+ * autonomous, teleoperated and test.
+ *
+ * <p> This runs after the mode specific periodic functions, but before
+ * LiveWindow and SmartDashboard integrated updating.
+ */
+void Robot::RobotPeriodic() {
+  auto armSensors = m_arm->getSensorValues();
 
-	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
-	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
-
-	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
-	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
-	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
+  frc::SmartDashboard::PutNumber("Arm Base Analog", armSensors.first);
+  frc::SmartDashboard::PutNumber("Arm Wrist Analog", armSensors.second);
 }
 
 /**
@@ -123,85 +63,21 @@ void Robot::RobotInit() {
  * if-else structure below with additional strings. If using the SendableChooser
  * make sure to add them to the chooser code above as well.
  */
+void Robot::AutonomousInit() {}
 
-void Robot::AutonomousInit() {
-	m_autoSelected = m_chooser.GetSelected();
-	// m_autoSelected = SmartDashboard::GetString(
-	// 		"Auto Selector", kAutoNameDefault);
-	std::cout << "Auto selected: " << m_autoSelected << std::endl;
-		
-	if (!m_followPath) {
-		m_followPath = std::make_unique< FollowPath >(pathresult.first, pathresult.second);
-	}
-
-	if (m_followPath) {
-		m_followPath->Start();
-	}
-
-	if (m_autoSelected == kAutoNameCustom) {
-		// Custom Auto goes here
-	} else {
-		// Default Auto goes here
-	}
-}
-
-void Robot::AutonomousPeriodic() {
-	frc::Scheduler::GetInstance()->Run();
-
-	if (m_autoSelected == kAutoNameCustom) {
-		// Custom Auto goes here
-	} else {
-		// Default Auto goes here
-	}
-}
+void Robot::AutonomousPeriodic() {}
 
 void Robot::TeleopInit() {
-	m_gyro->SetYaw(0, 10);
-
-	m_driveTrain->resetSensors();
-
-	if(m_arduino->handshake()) {
-		std::cout << "Successfully communicated with Arduino\n";
-	}
-	else {
-		std::cout << "Failed to establish communication with Arduino\n";
-	}
-
-	//m_calculation->join();
-
-
-	for (auto& point : pathresult.first) {
-		std::cout << "Time: " << point.dt << "\n";
-	}	
+  m_manualArm->Start();
 }
 
 void Robot::TeleopPeriodic() {
-	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
-	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
-
-	double ypr[3];
-	m_gyro->GetYawPitchRoll(ypr);
-	frc::SmartDashboard::PutNumber("Gyro Yaw", ypr[0]);
-
-	frc::Scheduler::GetInstance()->Run();
-
-	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
-		auto result = m_arduino->readData(false);
-		if (result.second) {
-			SensorFrame data = result.first;
-			std::cout << "Degrees: " << data.degrees << "\n";
-			std::cout << "Distance: " << data.distance << "\n";
-			std::cout << sizeof(float) << "\n";
-
-			float value = 2.53;
-			for (int i = 0; i < 4; ++i) {
-				std::cout << std::hex << int(reinterpret_cast< unsigned char* >(&value)[i]) << ", ";
-			}
-			std::cout << "\n";
-		}
-	}
+  std::cout << m_arm->getLevel() << "\n";
+  frc::Scheduler::GetInstance()->Run();
 }
 
 void Robot::TestPeriodic() {}
 
-//START_ROBOT_CLASS(Robot)
+#ifndef RUNNING_FRC_TESTS
+int main() { return frc::StartRobot<Robot>(); }
+#endif

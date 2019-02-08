@@ -12,9 +12,10 @@
 
 #include <memory>
 
-#include <ctre/Phoenix.h>
 #include <frc/Solenoid.h>
 #include <frc/commands/Subsystem.h>
+
+#include <ctre/Phoenix.h>
 
 class DriveTrain : public frc::Subsystem {
 public:
@@ -23,9 +24,9 @@ public:
 
 	void drive(InputState state);
 
-	void drive(double leftSpeed, double rightSpeed, bool percentOutput = false);
+	void drive(double leftSpeed, double rightSpeed, bool percentOutput = true);
 
-	std::pair< int, int > getEncoderPositions();
+	std::pair< std::array< int, 3 >, std::array< int, 3 > > getEncoderPositions();
 
 	void resetSensors();
 
@@ -33,7 +34,7 @@ public:
 
 private:
 
-	void calibratePhase(double leftSpeed, double rightSpeed);
+	//void calibratePhase(double leftSpeed, double rightSpeed);
 
 	bool leftSidePhase() const;
 	void setLeftSidePhase(bool phase);
@@ -41,18 +42,8 @@ private:
 	bool rightSidePhase() const;
 	void setRightSidePhase(bool phase);
 
-	WPI_TalonSRX m_frontLeft;
-	WPI_TalonSRX m_midLeft;
-	WPI_TalonSRX m_backLeft;
-
-	WPI_TalonSRX m_frontRight;
-	WPI_TalonSRX m_midRight;
-	WPI_TalonSRX m_backRight;
-
-	WPI_TalonSRX m_arm;
-
-	frc::Solenoid m_shiftFast;
-	frc::Solenoid m_shiftSlow;
+	std::array< std::unique_ptr< WPI_TalonSRX >, 3 > m_lMotors;
+	std::array< std::unique_ptr< WPI_TalonSRX >, 3 > m_rMotors;
 };
 
 

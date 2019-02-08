@@ -30,7 +30,7 @@ void FollowPath::Execute() {
         &m_lFollower,
         m_leftData.data(),
         m_leftData.size(),
-        Robot::m_driveTrain->getEncoderPositions().first
+        Robot::m_driveTrain->getEncoderPositions().first[1]
     );
 
     double r = pathfinder_follow_encoder(
@@ -38,7 +38,7 @@ void FollowPath::Execute() {
         &m_rFollower,
         m_rightData.data(),
         m_rightData.size(),
-        Robot::m_driveTrain->getEncoderPositions().second
+        Robot::m_driveTrain->getEncoderPositions().second[1]
     );
 
     // TODO: Apparently you need a gyro????
