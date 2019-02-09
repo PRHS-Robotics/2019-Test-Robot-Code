@@ -24,6 +24,7 @@
 
 
 #include "commands/ApproachCargo.h"
+#include "commands/ApproachTape.h"
 #include "commands/ManualControl.h"
 #include "commands/SpeedTest.h"
 #include "commands/FollowPath.h"
@@ -59,6 +60,7 @@ public:
 
 	static std::unique_ptr< ManualControl > m_manualControl;
 	static std::unique_ptr< ApproachCargo > m_approachCargo;
+	static std::unique_ptr< ApproachTape > m_approachTape;
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
 
