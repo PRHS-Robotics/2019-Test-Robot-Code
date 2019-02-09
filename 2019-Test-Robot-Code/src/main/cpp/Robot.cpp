@@ -86,8 +86,11 @@ void Robot::RobotInit() {
 	}
 
 	std::vector< Waypoint > waypoints = {
-		{ 0.0, 1.0, 0.0 },
-		{ 0.0, 3.0, 0.0 }
+		{ 0.0, 0.0, 0.0 },
+		{0.0, 1.0, 0.0}
+		//{-1.0, 4.0, d2r(45)},
+		//{-0.5, 4.5, d2r(45)}
+
 	};
 
 	m_gyro = std::make_unique< PigeonIMU >(8);

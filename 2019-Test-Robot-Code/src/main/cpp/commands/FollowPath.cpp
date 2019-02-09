@@ -5,7 +5,7 @@
 FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > rightData) :
     m_lFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
     m_rFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
-    m_config(EncoderConfig{ 0, 96, 0.6383528 /* ish */, 1.0, 0.0, 0.0, 1.0 / 15.0, 0.0 }),
+    m_config(EncoderConfig{ 0, 4096, 0.314159265/* ish */, 0.001, 0.0, 0.0, 1.0 / 3.0, 0.0 }),
     m_leftData(leftData),
     m_rightData(rightData),
     Command("FollowPath", *Robot::m_driveTrain.get())
