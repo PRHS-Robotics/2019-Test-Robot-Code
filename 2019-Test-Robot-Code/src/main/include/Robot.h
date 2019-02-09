@@ -64,4 +64,5 @@ public:
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
 
+	static std::unique_ptr< frc::AnalogInput > m_ultrasonic;
 };

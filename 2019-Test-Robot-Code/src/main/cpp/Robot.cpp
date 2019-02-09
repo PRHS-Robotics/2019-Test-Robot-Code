@@ -46,6 +46,8 @@ std::unique_ptr< ApproachTape > Robot::m_approachTape{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
+std::unique_ptr< frc::AnalogInput > Robot::m_ultrasonic{};
+
 std::unique_ptr< PigeonIMU > Robot::m_gyro{};
 
 void Robot::RobotInit() {
@@ -99,6 +101,8 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_approachTape = std::make_unique< ApproachTape >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
+
+	m_ultrasonic = std::make_unique< frc::AnalogInput >(3);
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
 
@@ -181,6 +185,7 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
+	frc::SmartDashboard::PutNumber("Ultrasonic Analog", m_ultrasonic->GetVoltage());
 
 	double ypr[3];
 	m_gyro->GetYawPitchRoll(ypr);
