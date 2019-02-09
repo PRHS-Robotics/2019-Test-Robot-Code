@@ -88,8 +88,8 @@ void Robot::RobotInit() {
 	}
 
 	std::vector< Waypoint > waypoints = {
-		{ 0.0, 0.0, 0.0 },
-		{0.0, 1.0, 0.0}
+		{ 0.0, 0.0, d2r(0.0)},
+		{ 1.0, 0.0, d2r(0.0)}
 		//{-1.0, 4.0, d2r(45)},
 		//{-0.5, 4.5, d2r(45)}
 
@@ -105,9 +105,6 @@ void Robot::RobotInit() {
 	m_ultrasonic = std::make_unique< frc::AnalogInput >(3);
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
-
-	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
-	camser->StartAm_gyro->GetYawPitchRoll(ypr)utomaticCapture();*/
 
 	frc::SmartDashboard::init();
 
@@ -132,6 +129,8 @@ void Robot::RobotInit() {
  */
 
 void Robot::AutonomousInit() {
+	m_gyro->SetYaw(0.0);
+
 	m_autoSelected = m_chooser.GetSelected();
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
@@ -185,7 +184,7 @@ void Robot::TeleopInit() {
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
-	frc::SmartDashboard::PutNumber("Ultrasonic Analog", m_ultrasonic->GetVoltage());
+	frc::SmartDashboard::PutNumber("Ultrasonic Analog", m_ultrasonic->GetVoltage() / 2.0);
 
 	double ypr[3];
 	m_gyro->GetYawPitchRoll(ypr);
