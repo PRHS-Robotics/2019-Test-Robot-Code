@@ -140,6 +140,9 @@ void DriveTrain::drive(InputState state) {
 
 	drive(lSpeed, rSpeed, buttonValue(state, "TRIGGER"));
 }
+/*void DriveTrain::driveElevator() {
+	drive(0.1,0.1, false);
+}*/
 
 template < typename T >
 int signum(const T& value) {

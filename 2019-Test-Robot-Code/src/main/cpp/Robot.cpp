@@ -9,9 +9,9 @@
 
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
+#include "subsystems/ElevatorDriveTrain.h"
 #include "subsystems/Autonomous.h"
 #include "subsystems/ArduinoInterface.h"
-
 #include <iostream>
 
 #include <SmartDashboard/SmartDashboard.h>
@@ -39,7 +39,8 @@ std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 std::unique_ptr< std::thread > Robot::m_calculation{};
-
+std::unique_ptr< Elevator > Robot::m_elevator{};
+std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< ApproachTape > Robot::m_approachTape{};
@@ -88,8 +89,16 @@ void Robot::RobotInit() {
 	}
 
 	std::vector< Waypoint > waypoints = {
+		/*{ 0.0, 0.0, d2r(0.0)},
+		{ 1.5, 1.5, d2r(90.0)},
+		{ 0.0, 3.0, d2r(180.0) },
+		{ -1.5, 1.5, d2r(270.0)},
+		{ 0.0, 0.0, d2r(0.0) }*/
 		{ 0.0, 0.0, d2r(0.0)},
-		{ 1.0, 0.0, d2r(0.0)}
+		{ 3.0, 2.5, d2r(0.0)},
+		{ 5.0, 2.5, d2r(0.0)}
+		//{ 1.0, -1.0, d2r(90.0) }
+		//{ 4.0, 0.0, d2r(-20.0)}
 		//{-1.0, 4.0, d2r(45)},
 		//{-0.5, 4.5, d2r(45)}
 
@@ -101,7 +110,9 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >(10);
 	m_approachTape = std::make_unique< ApproachTape >(10);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
-
+	m_elevator = std::make_unique< Elevator >(Robot::m_input.get());
+	//elevator
+	//m_elevatordrivetrain
 	m_ultrasonic = std::make_unique< frc::AnalogInput >(3);
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
@@ -111,9 +122,13 @@ void Robot::RobotInit() {
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
 
+	//frc::CameraServer::GetInstance()->StartAutomaticCapture();
+
 	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
 	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
 	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
+	//for elevator: under construction
+	m_input->getButton("ELEVATOR_UP_DOWN")->WhenPressed(m_elevator.get());
 }
 
 /**
@@ -137,6 +152,7 @@ void Robot::AutonomousInit() {
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
 		
 	if (!m_followPath) {
+		std::cout << "Making FollowPath command\n";
 		m_followPath = std::make_unique< FollowPath >(pathresult.first, pathresult.second);
 	}
 
@@ -166,6 +182,10 @@ void Robot::TeleopInit() {
 
 	m_driveTrain->resetSensors();
 
+	m_calculation->join();
+
+	Robot::m_manualControl->Start();
+
 	if(m_arduino->handshake()) {
 		std::cout << "Successfully communicated with Arduino\n";
 	}
@@ -174,17 +194,12 @@ void Robot::TeleopInit() {
 	}
 
 	//m_calculation->join();
-
-
-	for (auto& point : pathresult.first) {
-		std::cout << "Time: " << point.dt << "\n";
-	}	
 }
 
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
-	frc::SmartDashboard::PutNumber("Ultrasonic Analog", m_ultrasonic->GetVoltage() / 2.0);
+	frc::SmartDashboard::PutNumber("Ultrasonic Analog", m_ultrasonic->GetVoltage() / (5.0 / 512.0) + 2.0);
 
 	double ypr[3];
 	m_gyro->GetYawPitchRoll(ypr);
