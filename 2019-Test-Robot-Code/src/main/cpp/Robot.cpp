@@ -55,10 +55,12 @@ void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-
+	//under construction
+	m_elevatordrivetrain = std::make_unique< ElevatorDriveTrain >(0, 1);
+	//elevator drive train - get PWM motors and plug IDs into 1 and 2
 	m_driveTrain = std::make_unique< DriveTrain >(6, 5, 4, 1, 2, 3);
 
-	m_input = std::make_unique< Input >(1, 2);
+	m_input = std::make_unique< Input >(0, 2);
 
 	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
 	if (m_serialPort && m_serialPort->StatusIsFatal()) {

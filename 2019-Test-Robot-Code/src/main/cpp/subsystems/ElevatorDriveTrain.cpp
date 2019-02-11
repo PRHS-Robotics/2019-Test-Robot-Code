@@ -1,21 +1,25 @@
-/*----------------------------------------------------------------------------*/
-/* Copyright (c) 2017-2018 FIRST. All Rights Reserved.                        */
-/* Open Source Software - may be modified and shared by FRC teams. The code   */
-/* must be accompanied by the FIRST BSD license file in the root directory of */
-/* the project.                                                               */
-/*----------------------------------------------------------------------------*/
-//#include "Robot.h"
+#include "Robot.h"
 #include "subsystems/ElevatorDriveTrain.h"
-#include <SmartDashboard/SmartDashboard.h>
-//ElevatorDriveTrain::ElevatorDriveTrain() {}
-ElevatorDriveTrain::ElevatorDriveTrain(int upmotor, int drivemotor):
+//#include <ctre/Phoenix.h>
+#include "subsystems/Drivetrain.h"
+#include <frc/Talon.h>
+#include <frc/PWMSpeedController.h>
+//#include <SmartDashboard/SmartDashboard.h>
+#include <iostream>
+
+ElevatorDriveTrain::ElevatorDriveTrain(int motorup, int motordrive):
+el_motordrive(motordrive),
+el_motorup(motorup),
 Subsystem("ElevatorDriveTrain")
-{}
+{
+  
+  //frc::Scheduler::GetInstance()->RegisterSubsystem(this);
+}
 
 
-
-
-void ElevatorDriveTrain::Drive() {
-  frc::SmartDashboard::PutString("elevating?", "elevating")
-
+void ElevatorDriveTrain::drive() {
+  //std::cout << "ELEVATING"
+  
+  //el_motordrive.SetSpeed(0.1);
+  //Robot::m_driveTrain->drive(0.1, 0.1, false);
 }

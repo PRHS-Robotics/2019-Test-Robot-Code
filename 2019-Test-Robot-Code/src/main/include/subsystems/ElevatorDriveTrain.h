@@ -6,13 +6,19 @@
 /*----------------------------------------------------------------------------*/
 #ifndef SRC_SUBSYSTEMS_ELEVATORDRIVETRAIN_H_
 #define SRC_SUBSYSTEMS_ELEVATORDRIVETRAIN_H_
-#pragma once
 
-#include <frc/commands/Command.h>
+
 #include "subsystems/Input.h"
+#include <frc/commands/Subsystem.h>
+#include <ctre/Phoenix.h>
+#include <frc/Talon.h>
 class ElevatorDriveTrain : public frc::Subsystem {
  public:
-  ElevatorDriveTrain(int upmotor, int drivemotor);
-  void Drive();
+  ElevatorDriveTrain(int motorup, int motordrive);
+  void drive();
+  //frc::Talon el_motorup{0};
+  frc::PWMSpeedController motor1();
+private:
+  frc::Talon el_motordrive;
 };
 #endif /*SRC_SUBSYSTEMS_ELEVATORDRIVETRAIN_H_*/

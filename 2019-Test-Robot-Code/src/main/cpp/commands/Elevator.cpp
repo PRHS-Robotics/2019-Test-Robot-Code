@@ -26,8 +26,10 @@ void Elevator::Initialize() {
 
 // Called repeatedly when this Command is scheduled to run
 void Elevator::Execute() {
-  
- Robot::m_elevatordrivetrain->Drive();
+  //frc::Talon el_motorup{0};
+  //el_motorup.Set(0.1);
+  //el_motorup.Check();
+  Robot::m_elevatordrivetrain->drive();
 }
 
 // Make this return true when this Command no longer needs to run execute()
