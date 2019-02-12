@@ -37,31 +37,41 @@ void ApproachTape::Execute() {
 
 	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
 
+	SonarMax sensorboi(3);
+	
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
-		double yawValue = yaw.GetDouble(0.0);
+	if(SonarMax::getDistance(sensorboi)>8){
 
 		static MovingAverage yawAverager(m_yawSamples);
+    	if (detected.GetBoolean(false)) {
+			std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
-		if (detected.GetBoolean(false) && !m_lastDetected) {
-			yawAverager.Clear();
+			double yawValue = yaw.GetDouble(0.0);
+
+			const int SAMPLES = 10;
+			static MovingAverage yawAverager(SAMPLES);
+
+			if (detected.GetBoolean(false) && !m_lastDetected) {
+				yawAverager.Clear();
+			}
+
+			m_lastDetected = detected.GetBoolean(false);
+
+			double speed = 0.0;
+
+			double yawAverage = yawAverager.Process(yawValue);
+
+			if (yawAverage > -10 && yawAverage < 10) {
+				speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
+			}
+
+			frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
+
+			// TODO: Add gradual ramp-up
+			Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
 		}
-
-		m_lastDetected = detected.GetBoolean(false);
-
-		double speed = 0.0;
-
-		double yawAverage = yawAverager.Process(yawValue);
-
-		if (yawAverage > -10 && yawAverage < 10) {
-			speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
-		}
-
-		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
-
-		// TODO: Add gradual ramp-up
-		Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
 	}
 }
 

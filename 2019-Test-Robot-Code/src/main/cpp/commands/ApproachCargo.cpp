@@ -35,13 +35,15 @@ void ApproachCargo::Execute() {
 	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
 
 	frc::SmartDashboard::PutNumber("Cargo Contours", table->GetEntry("cargoContours").GetDouble(0.0));
+	static double yawCurrent = 0;
 
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
 		double yawValue = yaw.GetDouble(0.0);
 
-		static MovingAverage yawAverager(m_yawSamples);
+		const int SAMPLES = 2;
+		static MovingAverage yawAverager(SAMPLES);
 
 		if (detected.GetBoolean(false) && !m_lastDetected) {
 			yawAverager.Clear();
@@ -59,10 +61,16 @@ void ApproachCargo::Execute() {
 
 		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
 
-		// TODO: Add gradual ramp-up
-		Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
+		double yawDiff;
+
+		yawDiff = yawAverage - yawCurrent;
+		yawCurrent += yawDiff / 20.0;
+		Robot::m_driveTrain->drive(yawCurrent / 50.0 + speed, -yawCurrent / 50.0 + speed);
 	}
-}
+	else {
+		Robot::m_driveTrain->drive(0.0, 0.0);
+	}
+
 
 bool ApproachCargo::IsFinished() {
     // TODO: Determine when close enough to cargo

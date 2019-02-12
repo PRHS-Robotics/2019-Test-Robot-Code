@@ -2,10 +2,12 @@
 #include "subsystems/DriveTrain.h"
 #include "Robot.h"
 
+#include <iostream>
+
 FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > rightData) :
     m_lFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
     m_rFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
-    m_config(EncoderConfig{ 0, 96, 0.6383528 /* ish */, 1.0, 0.0, 0.0, 1.0 / 15.0, 0.0 }),
+    m_config(EncoderConfig{ 0, 4096, 0.314159265/* ish */,  0.01, 0 , 0.0, 1.0 / 1.5, 0.0 }),
     m_leftData(leftData),
     m_rightData(rightData),
     Command("FollowPath", *Robot::m_driveTrain.get())
@@ -16,6 +18,9 @@ FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > r
 void FollowPath::Initialize() {
 
     Robot::m_driveTrain->resetSensors();
+
+    m_lFollower = EncoderFollower{ 0, 0, 0, 0, 0 };
+    m_rFollower = EncoderFollower{ 0, 0, 0, 0, 0 };
 
     // TODO: Measure wheel circumference
     // TODO: Adjust gains
@@ -40,14 +45,35 @@ void FollowPath::Execute() {
         m_rightData.size(),
         Robot::m_driveTrain->getEncoderPositions().second
     );
+    
+    double ypr[3];
+    Robot::m_gyro->GetYawPitchRoll(ypr);
+    double gyro_heading = std::fmod((std::fmod(ypr[0], 360) + 360), 360);  // Assuming gyro angle is given in degrees
+    double desired_heading = std::fmod((std::fmod(r2d(m_lFollower.heading), 360) + 360), 360);
 
-    // TODO: Apparently you need a gyro????
+    std::cout << "Follower: " << desired_heading << ", Gyro: " << gyro_heading << "\n";
 
-    Robot::m_driveTrain->drive(l, r);
+    double temp = desired_heading - gyro_heading;
+    double angle_difference = temp;
+    if (temp > 180) {
+        angle_difference -= 360;
+    }
+    if (temp < -180) {
+        angle_difference += 360;
+    }
+
+    //double angle_difference = 180.0 - std::fabs(std::fabs(desired_heading - gyro_heading) - 180.0);    // Make sure to bound this from -180 to 180, otherwise you will get super large values
+
+    double turn = /*0.8*/1.0 * (-1.0/80.0) * angle_difference;
+
+    //turn = 0.0;
+
+    Robot::m_driveTrain->drive(l + turn, r - turn);
+
 }
 
 bool FollowPath::IsFinished() {
-    return false;
+    return m_lFollower.finished && m_rFollower.finished;
 }
 
 void FollowPath::End() {
