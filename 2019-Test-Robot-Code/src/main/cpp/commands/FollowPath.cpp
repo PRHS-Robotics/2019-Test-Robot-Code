@@ -61,15 +61,10 @@ void FollowPath::Execute() {
     if (temp < -180) {
         angle_difference += 360;
     }
-
-    //double angle_difference = 180.0 - std::fabs(std::fabs(desired_heading - gyro_heading) - 180.0);    // Make sure to bound this from -180 to 180, otherwise you will get super large values
-
+    
     double turn = /*0.8*/1.0 * (-1.0/80.0) * angle_difference;
 
-    //turn = 0.0;
-
     Robot::m_driveTrain->drive(l + turn, r - turn);
-
 }
 
 bool FollowPath::IsFinished() {

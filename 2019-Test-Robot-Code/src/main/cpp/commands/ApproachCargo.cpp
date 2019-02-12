@@ -70,7 +70,7 @@ void ApproachCargo::Execute() {
 	else {
 		Robot::m_driveTrain->drive(0.0, 0.0);
 	}
-
+}
 
 bool ApproachCargo::IsFinished() {
     // TODO: Determine when close enough to cargo

@@ -68,10 +68,5 @@ public:
 	static std::unique_ptr< ApproachTape > m_approachTape;
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
-<<<<<<< HEAD
 	static std::unique_ptr< SonarMax > m_sonarMax;
-=======
-
-	static std::unique_ptr< frc::AnalogInput > m_ultrasonic;
->>>>>>> 30132de1c7e3167c7df0d4ae7a725dc299a1e775
 };

@@ -34,15 +34,12 @@ void ApproachTape::Execute() {
 
 	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
-
+	nt::NetworkTableEntry distance = table->GetEntry("tapeDistance");
 	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
 
 	SonarMax sensorboi(3);
-	
-    if (detected.GetBoolean(false)) {
-		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
-	if(SonarMax::getDistance(sensorboi)>8){
+	if(sensorboi.getDistance()>8){
 
 		static MovingAverage yawAverager(m_yawSamples);
     	if (detected.GetBoolean(false)) {

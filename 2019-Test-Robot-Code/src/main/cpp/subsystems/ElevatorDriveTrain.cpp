@@ -1,7 +1,7 @@
 #include "Robot.h"
 #include "subsystems/ElevatorDriveTrain.h"
 //#include <ctre/Phoenix.h>
-#include "subsystems/Drivetrain.h"
+#include "subsystems/DriveTrain.h"
 #include <frc/Talon.h>
 #include <frc/PWMSpeedController.h>
 //#include <SmartDashboard/SmartDashboard.h>
@@ -9,7 +9,7 @@
 
 ElevatorDriveTrain::ElevatorDriveTrain(int motorup, int motordrive):
 el_motordrive(motordrive),
-el_motorup(motorup),
+//el_motorup(motorup),
 Subsystem("ElevatorDriveTrain")
 {
   

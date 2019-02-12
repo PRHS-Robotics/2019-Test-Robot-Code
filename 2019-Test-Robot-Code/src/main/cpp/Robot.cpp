@@ -106,16 +106,12 @@ void Robot::RobotInit() {
 
 	};
 
-	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
-	m_approachCargo = std::make_unique< ApproachCargo >(10);
-	m_speedTest = std::make_unique< SpeedTest >(0.5);
-
 	m_sonarMax = std::make_unique< SonarMax >(3);
 	m_gyro = std::make_unique< PigeonIMU >(8);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
-	m_approachCargo = std::make_unique< ApproachCargo >(5);
-	m_approachTape = std::make_unique< ApproachTape >(5);
+	m_approachCargo = std::make_unique< ApproachCargo >(1);
+	m_approachTape = std::make_unique< ApproachTape >(1);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 	m_elevator = std::make_unique< Elevator >(Robot::m_input.get());
 	//elevator

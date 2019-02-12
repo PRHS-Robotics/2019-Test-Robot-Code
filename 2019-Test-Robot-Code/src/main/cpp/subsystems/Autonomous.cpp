@@ -23,6 +23,11 @@ std::pair< std::vector< Segment >, std::vector< Segment > > generateTrajectory(s
 	//candidate.length = candidate.path_length;
 	if (candidate.length == INT_MAX) {
 		std::cout << "Invalid candidate length\n";
+		std::cout << "totalLength: " << candidate.totalLength << "\n";
+		std::cout << "length: " << candidate.length << "\n";
+		std::cout << "path_length: " << candidate.path_length << "\n";
+		//std::cout << "info: " << candidate.info << "\n";
+		//std::cout << "config: " << candidate.config << "\n";
 		return { {}, {} };
 	}
 
