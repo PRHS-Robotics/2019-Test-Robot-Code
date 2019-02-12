@@ -23,7 +23,7 @@ public:
 
 	void drive(InputState state);
 
-	void drive(double leftSpeed, double rightSpeed);
+	void drive(double leftSpeed, double rightSpeed, bool percentOutput = false);
 
 	std::pair< int, int > getEncoderPositions();
 

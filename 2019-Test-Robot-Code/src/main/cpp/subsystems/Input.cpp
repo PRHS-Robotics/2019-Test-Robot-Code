@@ -77,6 +77,7 @@ InputState Input::getRawInput() {
 		primary.GetX(),
 		primary.GetY(),
 		primary.GetZ(),
+		primary.GetThrottle(),
 		0
 	};
 	for (std::size_t i = 0; i < MAX_BUTTONS; ++i) {
@@ -93,6 +94,8 @@ InputState Input::getInput() {
 
 	rawState.x = applyDeadzone(rawState.x, deadzone);
 	rawState.y = applyDeadzone(rawState.y, deadzone);
+
+	rawState.t = applyDeadzone(rawState.t, deadzone);
 
 	return rawState;
 }

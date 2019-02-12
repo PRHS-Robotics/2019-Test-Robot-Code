@@ -49,8 +49,8 @@ T correctEndianness(T value) {
 }
 
 // TODO: Check endianness here too
-std::pair< SensorFrame, bool > Arduino::readData() {
-	RxFrame rawFrame = readRawData();
+std::pair< SensorFrame, bool > Arduino::readData(bool light) {
+	RxFrame rawFrame = readRawData(light);
 
 	// Check for basic transmission errors
 	if (rawFrame.verification != RxFrame::magic_number) {
@@ -66,8 +66,8 @@ std::pair< SensorFrame, bool > Arduino::readData() {
 
 // TODO: Check endianness
 // RoboRio is likely big endian and Arduinos are little endian
-Arduino::RxFrame Arduino::readRawData() {
-	TxFrame txFrame{ TxFrame::magic_number };
+Arduino::RxFrame Arduino::readRawData(bool light) {
+	TxFrame txFrame{ TxFrame::magic_number, light };
 	RxFrame rxFrame{ 0, 0, 0 };
 
 	m_i2c.WriteBulk(reinterpret_cast< uint8_t* >(&txFrame), sizeof(txFrame));

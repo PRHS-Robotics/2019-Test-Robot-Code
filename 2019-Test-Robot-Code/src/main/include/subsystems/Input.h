@@ -24,13 +24,14 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
 		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
 		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
-		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } }
+		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
+		{ "ELEVATOR_UP_DOWN", {"Elevator", 11 } }
 };
 
 constexpr const std::size_t MAX_BUTTONS = 11;
 
 struct InputState {
-	double x, y, r;
+	double x, y, r, t;
 	std::bitset< MAX_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
 };
 

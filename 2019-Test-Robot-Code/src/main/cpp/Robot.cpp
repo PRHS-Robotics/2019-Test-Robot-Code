@@ -9,9 +9,9 @@
 
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
+#include "subsystems/ElevatorDriveTrain.h"
 #include "subsystems/Autonomous.h"
 #include "subsystems/ArduinoInterface.h"
-
 #include <iostream>
 
 #include <SmartDashboard/SmartDashboard.h>
@@ -39,22 +39,28 @@ std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 std::unique_ptr< std::thread > Robot::m_calculation{};
-
+std::unique_ptr< Elevator > Robot::m_elevator{};
+std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
+std::unique_ptr< ApproachTape > Robot::m_approachTape{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
 std::unique_ptr< SonarMax > Robot::m_sonarMax{};
 
+std::unique_ptr< PigeonIMU > Robot::m_gyro{};
+
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
+	//under construction
+	m_elevatordrivetrain = std::make_unique< ElevatorDriveTrain >(0, 1);
+	//elevator drive train - get PWM motors and plug IDs into 1 and 2
+	m_driveTrain = std::make_unique< DriveTrain >(6, 5, 4, 1, 2, 3);
 
-	m_driveTrain = std::make_unique< DriveTrain >(1, 2, 3, 4, 5, 6);
-
-	m_input = std::make_unique< Input >(1, 2);
+	m_input = std::make_unique< Input >(0, 2);
 
 	m_serialPort = std::make_unique< frc::SerialPort >(9600, frc::SerialPort::Port::kUSB);
 	if (m_serialPort && m_serialPort->StatusIsFatal()) {
@@ -85,8 +91,19 @@ void Robot::RobotInit() {
 	}
 
 	std::vector< Waypoint > waypoints = {
-		{ 0.0, 1.0, 0.0 },
-		{ 0.0, 3.0, 0.0 }
+		/*{ 0.0, 0.0, d2r(0.0)},
+		{ 1.5, 1.5, d2r(90.0)},
+		{ 0.0, 3.0, d2r(180.0) },
+		{ -1.5, 1.5, d2r(270.0)},
+		{ 0.0, 0.0, d2r(0.0) }*/
+		{ 0.0, 0.0, d2r(0.0)},
+		{ 3.0, 2.5, d2r(0.0)},
+		{ 5.0, 2.5, d2r(0.0)}
+		//{ 1.0, -1.0, d2r(90.0) }
+		//{ 4.0, 0.0, d2r(-20.0)}
+		//{-1.0, 4.0, d2r(45)},
+		//{-0.5, 4.5, d2r(45)}
+
 	};
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
@@ -94,20 +111,30 @@ void Robot::RobotInit() {
 	m_speedTest = std::make_unique< SpeedTest >(0.5);
 
 	m_sonarMax = std::make_unique< SonarMax >(3);
+	m_gyro = std::make_unique< PigeonIMU >(8);
 
-	//m_calculation = std::make_unique< std::thread >(f, waypoints);
+	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
+	m_approachCargo = std::make_unique< ApproachCargo >(10);
+	m_approachTape = std::make_unique< ApproachTape >(10);
+	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
+	m_elevator = std::make_unique< Elevator >(Robot::m_input.get());
+	//elevator
+	//m_elevatordrivetrain
 
-	/*frc::CameraServer *camser = frc::CameraServer::GetInstance();
-	camser->StartAutomaticCapture();*/
+	m_calculation = std::make_unique< std::thread >(f, waypoints);
 
 	frc::SmartDashboard::init();
 
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
 
+	//frc::CameraServer::GetInstance()->StartAutomaticCapture();
+
 	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
 	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
 	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
+	//for elevator: under construction
+	m_input->getButton("ELEVATOR_UP_DOWN")->WhenPressed(m_elevator.get());
 }
 
 /**
@@ -123,11 +150,21 @@ void Robot::RobotInit() {
  */
 
 void Robot::AutonomousInit() {
+	m_gyro->SetYaw(0.0);
+
 	m_autoSelected = m_chooser.GetSelected();
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
+		
+	if (!m_followPath) {
+		std::cout << "Making FollowPath command\n";
+		m_followPath = std::make_unique< FollowPath >(pathresult.first, pathresult.second);
+	}
 
+	if (m_followPath) {
+		m_followPath->Start();
+	}
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -137,7 +174,7 @@ void Robot::AutonomousInit() {
 }
 
 void Robot::AutonomousPeriodic() {
-	m_driveTrain->drive(0.0, 0.0);
+	frc::Scheduler::GetInstance()->Run();
 
 	if (m_autoSelected == kAutoNameCustom) {
 		// Custom Auto goes here
@@ -147,7 +184,13 @@ void Robot::AutonomousPeriodic() {
 }
 
 void Robot::TeleopInit() {
+	m_gyro->SetYaw(0, 10);
+
 	m_driveTrain->resetSensors();
+
+	m_calculation->join();
+
+	Robot::m_manualControl->Start();
 
 	if(m_arduino->handshake()) {
 		std::cout << "Successfully communicated with Arduino\n";
@@ -157,21 +200,20 @@ void Robot::TeleopInit() {
 	}
 
 	//m_calculation->join();
-
-
-	for (auto& point : pathresult.first) {
-		std::cout << "Time: " << point.dt << "\n";
-	}	
 }
 
 void Robot::TeleopPeriodic() {
 	frc::SmartDashboard::PutNumber("Analog Input Raw", m_analogInput->GetVoltage());
 	frc::SmartDashboard::PutNumber("Analog Input Averaged", m_analogInput->GetAverageVoltage());
 
+	double ypr[3];
+	m_gyro->GetYawPitchRoll(ypr);
+	frc::SmartDashboard::PutNumber("Gyro Yaw", ypr[0]);
+
 	frc::Scheduler::GetInstance()->Run();
 
 	if (buttonValue(m_input->getInput(), "DEBUG_BUTTON")) {
-		auto result = m_arduino->readData();
+		auto result = m_arduino->readData(false);
 		if (result.second) {
 			SensorFrame data = result.first;
 			std::cout << "Degrees: " << data.degrees << "\n";

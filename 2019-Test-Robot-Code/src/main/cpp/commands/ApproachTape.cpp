@@ -1,4 +1,4 @@
-#include "commands/ApproachCargo.h"
+#include "commands/ApproachTape.h"
 #include "subsystems/DriveTrain.h"
 #include "subsystems/ArduinoInterface.h"
 #include "Robot.h"
@@ -8,34 +8,32 @@
 
 #include <iostream>
 
-ApproachCargo::ApproachCargo(int yawSamples) :
+ApproachTape::ApproachTape(int yawSamples) :
     m_yawSamples(yawSamples),
     m_yawAverager(m_yawSamples),
-    frc::Command("ApproachCargo", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
+    frc::Command("ApproachTape", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
 {
 
 }
 
-void ApproachCargo::Initialize() {
+void ApproachTape::Initialize() {
     m_lastDetected = false;
 	Robot::m_arduino->readData(true);
 }
 
-void ApproachCargo::Execute() {
+void ApproachTape::Execute() {
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
 
-	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
-	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
-
-	static double yawCurrent = 0;
+	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
+	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
 
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
 		double yawValue = yaw.GetDouble(0.0);
 
-		const int SAMPLES = 2;
+		const int SAMPLES = 10;
 		static MovingAverage yawAverager(SAMPLES);
 
 		if (detected.GetBoolean(false) && !m_lastDetected) {
@@ -54,32 +52,21 @@ void ApproachCargo::Execute() {
 
 		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
 
-<<<<<<< HEAD
-		double yawDiff;
-
-		yawDiff = yawAverage - yawCurrent;
-		yawCurrent += yawDiff / 20.0;
-		Robot::m_driveTrain->drive(yawCurrent / 50.0 + speed, -yawCurrent / 50.0 + speed);
-=======
 		// TODO: Add gradual ramp-up
 		Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
->>>>>>> 30132de1c7e3167c7df0d4ae7a725dc299a1e775
 	}
-	else {
-		Robot::m_driveTrain->drive(0.0, 0.0);
-	}
+}
 
-
-bool ApproachCargo::IsFinished() {
-    // TODO: Determine when close enough to cargo
+bool ApproachTape::IsFinished() {
+    // TODO: Determine when close enough to tape
     return false;
 }
 
-void ApproachCargo::End() {
+void ApproachTape::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
 	Robot::m_arduino->readData(false);
 }
 
-void ApproachCargo::Interrupted() {
+void ApproachTape::Interrupted() {
     End();
 }

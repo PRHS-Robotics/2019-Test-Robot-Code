@@ -1,12 +1,12 @@
 #pragma once
 
-#include "subsystems/Input.h"
-
 #include <frc/commands/Command.h>
 
-class SpeedTest : public frc::Command {
+#include <ctre/Phoenix.h>
+
+class ApproachTape : public frc::Command {
 public:
-    SpeedTest(Input *input);
+    ApproachTape(int yawSamples);
 
     void Initialize() override;
 
@@ -19,5 +19,7 @@ public:
     void Interrupted() override;
 
 private:
-    Input *m_input;
+	bool m_lastDetected = false;
+    const int m_yawSamples;
+    MovingAverage m_yawAverager;
 };
