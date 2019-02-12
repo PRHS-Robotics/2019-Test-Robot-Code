@@ -9,7 +9,6 @@
 
 #include "subsystems/DriveTrain.h"
 #include "subsystems/Input.h"
-#include "subsystems/ElevatorDriveTrain.h"
 #include "subsystems/Autonomous.h"
 #include "subsystems/ArduinoInterface.h"
 #include <iostream>
@@ -39,8 +38,6 @@ std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 std::unique_ptr< std::thread > Robot::m_calculation{};
-std::unique_ptr< Elevator > Robot::m_elevator{};
-std::unique_ptr< ElevatorDriveTrain > Robot::m_elevatordrivetrain{};
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< ApproachTape > Robot::m_approachTape{};
@@ -55,9 +52,6 @@ void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
 	frc::SmartDashboard::PutData("Auto Modes", &m_chooser);
-	//under construction
-	m_elevatordrivetrain = std::make_unique< ElevatorDriveTrain >(0, 1);
-	//elevator drive train - get PWM motors and plug IDs into 1 and 2
 	m_driveTrain = std::make_unique< DriveTrain >(6, 5, 4, 1, 2, 3);
 
 	m_input = std::make_unique< Input >(0, 2);
@@ -113,9 +107,6 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >(1);
 	m_approachTape = std::make_unique< ApproachTape >(1);
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
-	m_elevator = std::make_unique< Elevator >(Robot::m_input.get());
-	//elevator
-	//m_elevatordrivetrain
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
 
@@ -130,8 +121,6 @@ void Robot::RobotInit() {
 	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());
 	m_input->getButton("DEBUG_BUTTON_2")->WhenPressed(m_speedTest.get());
 	m_input->getButton("FIND_TAPE")->WhenPressed(m_approachTape.get());
-	//for elevator: under construction
-	m_input->getButton("ELEVATOR_UP_DOWN")->WhenPressed(m_elevator.get());
 }
 
 /**

@@ -22,7 +22,6 @@
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTable.h>
 
-#include "commands/Elevator.h"
 #include "commands/ApproachCargo.h"
 #include "commands/ApproachTape.h"
 #include "commands/ManualControl.h"
@@ -35,7 +34,6 @@ class DriveTrain;
 class Input;
 class Autonomous;
 class Arduino;
-class ElevatorDriveTrain;
 
 class Robot : public frc::TimedRobot {
 public:
@@ -53,15 +51,12 @@ public:
 
 	static std::unique_ptr< DriveTrain > m_driveTrain;
 	static std::unique_ptr< Input > m_input;
-	static std::unique_ptr< ElevatorDriveTrain > m_elevatordrivetrain;
-	//static std::unique_ptr< Autonomous > m_autonomous;
 	static std::unique_ptr< Arduino > m_arduino;
 	static std::unique_ptr< frc::SerialPort > m_serialPort;
 	static std::unique_ptr< frc::AnalogInput > m_analogInput;
 	static std::unique_ptr< frc::Compressor > m_compressor;
 	static std::unique_ptr< std::thread > m_calculation;
 	static std::unique_ptr< PigeonIMU > m_gyro;
-	static std::unique_ptr< Elevator > m_elevator;
 
 	static std::unique_ptr< ManualControl > m_manualControl;
 	static std::unique_ptr< ApproachCargo > m_approachCargo;
