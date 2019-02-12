@@ -28,9 +28,9 @@ void ApproachTape::Execute() {
 	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
 
-	SonarMax sensorboi(3);
+	SonarMax sensorgal(3);
 
-	if(SonarMax::getDistance(sensorboi)>8){
+	if(sensorgal.getDistance()>8){
 
     	if (detected.GetBoolean(false)) {
 			std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
