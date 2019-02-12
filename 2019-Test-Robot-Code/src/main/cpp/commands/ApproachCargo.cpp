@@ -26,6 +26,8 @@ void ApproachCargo::Execute() {
 	nt::NetworkTableEntry detected = table->GetEntry("cargoDetected");
 	nt::NetworkTableEntry yaw = table->GetEntry("cargoYaw");
 
+	static double yawCurrent = 0;
+
     if (detected.GetBoolean(false)) {
 		std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
 
@@ -49,14 +51,17 @@ void ApproachCargo::Execute() {
 		}
 
 		frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
-		static double yawCurrent = 0;
+
 		double yawDiff;
 
 		yawDiff = yawAverage - yawCurrent;
-		yawCurrent += yawDiff / 5.0;
-		Robot::m_driveTrain->drive(yawCurrent / 3.0 + speed, -yawCurrent / 3.0 + speed);
+		yawCurrent += yawDiff / 20.0;
+		Robot::m_driveTrain->drive(yawCurrent / 50.0 + speed, -yawCurrent / 50.0 + speed);
 	}
-}
+	else {
+		Robot::m_driveTrain->drive(0.0, 0.0);
+	}
+
 
 bool ApproachCargo::IsFinished() {
     // TODO: Determine when close enough to cargo

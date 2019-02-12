@@ -45,6 +45,8 @@ std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< SpeedTest > Robot::m_speedTest{};
 std::unique_ptr< FollowPath > Robot::m_followPath{};
 
+std::unique_ptr< SonarMax > Robot::m_sonarMax{};
+
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
 	m_chooser.AddObject(kAutoNameCustom, kAutoNameCustom);
@@ -87,9 +89,11 @@ void Robot::RobotInit() {
 		{ 0.0, 3.0, 0.0 }
 	};
 
-	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get()),
-	m_approachCargo = std::make_unique< ApproachCargo >(10),
-	m_speedTest = std::make_unique< SpeedTest >(0.5),
+	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
+	m_approachCargo = std::make_unique< ApproachCargo >(10);
+	m_speedTest = std::make_unique< SpeedTest >(0.5);
+
+	m_sonarMax = std::make_unique< SonarMax >(3);
 
 	//m_calculation = std::make_unique< std::thread >(f, waypoints);
 

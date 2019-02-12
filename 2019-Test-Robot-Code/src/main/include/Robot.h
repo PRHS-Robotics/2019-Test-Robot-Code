@@ -28,6 +28,8 @@
 #include "commands/SpeedTest.h"
 #include "commands/FollowPath.h"
 
+#include "subsystems/SonarMax.h"
+
 class DriveTrain;
 class Input;
 class Autonomous;
@@ -60,4 +62,5 @@ public:
 	static std::unique_ptr< ApproachCargo > m_approachCargo;
 	static std::unique_ptr< SpeedTest > m_speedTest;
 	static std::unique_ptr< FollowPath > m_followPath;
+	static std::unique_ptr< SonarMax > m_sonarMax;
 };
