@@ -30,7 +30,7 @@ void ApproachTape::Execute() {
 
 	SonarMax sensorgal(3);
 
-	if(sensorgal.getDistance()>8){
+	if(sensorgal.getDistance()>30){
 
     	if (detected.GetBoolean(false)) {
 			std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
