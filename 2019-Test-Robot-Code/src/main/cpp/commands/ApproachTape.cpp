@@ -37,9 +37,9 @@ void ApproachTape::Execute() {
 	nt::NetworkTableEntry distance = table->GetEntry("tapeDistance");
 	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
 
-	SonarMax sensorboi(3);
+	SonarMax sensorgal(3);
 
-	if(sensorboi.getDistance()>8){
+	if(sensorgal.getDistance()>8){
 
 		static MovingAverage yawAverager(m_yawSamples);
     	if (detected.GetBoolean(false)) {
