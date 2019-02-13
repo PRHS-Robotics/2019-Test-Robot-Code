@@ -122,7 +122,7 @@ void Robot::RobotInit() {
 	frc::SmartDashboard::PutNumber("Forward Limit", 3.000);
 	frc::SmartDashboard::PutNumber("Reverse Limit", 2.883);
 
-	//frc::CameraServer::GetInstance()->StartAutomaticCapture();
+	frc::CameraServer::GetInstance()->StartAutomaticCapture();
 
 	m_input->getButton("MANUAL_OVERRIDE")->WhenPressed(m_manualControl.get());
 	m_input->getButton("SEARCH_AND_DESTROY")->WhenPressed(m_approachCargo.get());

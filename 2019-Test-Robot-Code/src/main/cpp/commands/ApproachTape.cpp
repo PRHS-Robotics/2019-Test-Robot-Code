@@ -67,5 +67,5 @@ std::pair< double, bool > ApproachTape::getTargetYaw() {
 		return { 0.0, false };
 	}
 
-	return { yaw.GetDouble(0.0), true };
+	return { yaw.GetDouble(0.0) - 5.0, true };
 }
