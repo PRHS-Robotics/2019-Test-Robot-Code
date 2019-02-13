@@ -16,7 +16,7 @@ ApproachTape::ApproachTape() :
 }
 
 void ApproachTape::Initialize() {
-	Robot::m_arduino->readData(true);
+	Robot::m_lights->Set(true);
 
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
@@ -29,10 +29,10 @@ void ApproachTape::Execute() {
 	auto result = getTargetYaw();
 
 	double turningSpeed = result.first / 50.0;
-	double forwardSpeed = std::max((1.0 - std::abs(result.first / 10.0)) * 0.2, 0.0);
+	double forwardSpeed = result.second * std::max((1.0 - std::abs(result.first / 10.0)) * 0.2, 0.0);
 
 	/* --- TODO: Determine distance --- */
-	if (Robot::m_sonarMax->getDistance() < 10.0) {
+	if (Robot::m_sonarMax->getDistance() < 25.0) {
 		turningSpeed = 0.0;
 		forwardSpeed = 0.0;
 	}
@@ -47,7 +47,7 @@ bool ApproachTape::IsFinished() {
 
 void ApproachTape::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
-	Robot::m_arduino->readData(false);
+	Robot::m_lights->Set(false);
 }
 
 void ApproachTape::Interrupted() {

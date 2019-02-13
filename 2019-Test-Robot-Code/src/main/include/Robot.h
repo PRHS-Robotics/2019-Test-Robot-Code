@@ -18,6 +18,7 @@
 #include <frc/AnalogInput.h>
 #include <frc/Compressor.h>
 #include <frc/commands/Scheduler.h>
+#include <frc/DigitalOutput.h>
 #include <frc/smartdashboard/SmartDashboard.h>
 #include <cameraserver/CameraServer.h>
 #include <networktables/NetworkTable.h>
@@ -38,6 +39,7 @@ class Arduino;
 class Robot : public frc::TimedRobot {
 public:
 	void RobotInit() override;
+	void RobotPeriodic() override;
 	void AutonomousInit() override;
 	void AutonomousPeriodic() override;
 	void TeleopInit() override;
@@ -56,6 +58,7 @@ public:
 	static std::unique_ptr< frc::AnalogInput > m_analogInput;
 	static std::unique_ptr< frc::Compressor > m_compressor;
 	static std::unique_ptr< std::thread > m_calculation;
+	static std::unique_ptr< frc::DigitalOutput > m_lights;
 	static std::unique_ptr< PigeonIMU > m_gyro;
 
 	static std::unique_ptr< ManualControl > m_manualControl;

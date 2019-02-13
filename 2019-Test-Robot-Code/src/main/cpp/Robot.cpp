@@ -37,6 +37,7 @@ std::unique_ptr< Arduino > Robot::m_arduino{};
 std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
+std::unique_ptr< frc::DigitalOutput > Robot::m_lights{};
 std::unique_ptr< std::thread > Robot::m_calculation{};
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
@@ -47,6 +48,10 @@ std::unique_ptr< FollowPath > Robot::m_followPath{};
 std::unique_ptr< SonarMax > Robot::m_sonarMax{};
 
 std::unique_ptr< PigeonIMU > Robot::m_gyro{};
+
+void Robot::RobotPeriodic() {
+	frc::SmartDashboard::PutNumber("Ultrasonic Distance", m_sonarMax->getDistance());
+}
 
 void Robot::RobotInit() {
 	m_chooser.AddDefault(kAutoNameDefault, kAutoNameDefault);
@@ -107,6 +112,8 @@ void Robot::RobotInit() {
 	m_approachCargo = std::make_unique< ApproachCargo >();
 	m_approachTape = std::make_unique< ApproachTape >();
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
+
+	m_lights = std::make_unique< frc::DigitalOutput >(0);
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);
 
