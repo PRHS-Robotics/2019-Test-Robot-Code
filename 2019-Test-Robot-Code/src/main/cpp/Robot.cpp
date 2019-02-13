@@ -104,8 +104,8 @@ void Robot::RobotInit() {
 	m_gyro = std::make_unique< PigeonIMU >(8);
 
 	m_manualControl = std::make_unique< ManualControl >(Robot::m_input.get());
-	m_approachCargo = std::make_unique< ApproachCargo >(1);
-	m_approachTape = std::make_unique< ApproachTape >(1);
+	m_approachCargo = std::make_unique< ApproachCargo >();
+	m_approachTape = std::make_unique< ApproachTape >();
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
 	m_calculation = std::make_unique< std::thread >(f, waypoints);

@@ -7,17 +7,15 @@
 #include <networktables/NetworkTableInstance.h>
 
 #include <iostream>
+#include <algorithm>
 
-ApproachTape::ApproachTape(int yawSamples) :
-    m_yawSamples(yawSamples),
-    m_yawAverager(m_yawSamples),
-    frc::Command("ApproachTape", *static_cast< frc::Subsystem* >(Robot::m_driveTrain.get()))
+ApproachTape::ApproachTape() :
+    frc::Command("ApproachTape", *Robot::m_driveTrain.get())
 {
 
 }
 
 void ApproachTape::Initialize() {
-    m_lastDetected = false;
 	Robot::m_arduino->readData(true);
 
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
@@ -25,51 +23,21 @@ void ApproachTape::Initialize() {
 
 	nt::NetworkTableEntry useTape = table->GetEntry("Tape");
 	useTape.SetBoolean(true);
-	
 }
 
 void ApproachTape::Execute() {
-	auto ntinstance = nt::NetworkTableInstance::GetDefault();
-	auto table = ntinstance.GetTable("ChickenVision");
+	auto result = getTargetYaw();
 
-	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
-	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
-	nt::NetworkTableEntry distance = table->GetEntry("tapeDistance");
-	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
+	double turningSpeed = result.first / 50.0;
+	double forwardSpeed = std::max((1.0 - std::abs(result.first / 10.0)) * 0.2, 0.0);
 
-	SonarMax sensorgal(3);
-
-	if(sensorgal.getDistance()>8){
-
-		static MovingAverage yawAverager(m_yawSamples);
-    	if (detected.GetBoolean(false)) {
-			std::cout << "Yaw: " << yaw.GetDouble(0.0) << "\n";
-
-			double yawValue = yaw.GetDouble(0.0);
-
-			const int SAMPLES = 10;
-			static MovingAverage yawAverager(SAMPLES);
-
-			if (detected.GetBoolean(false) && !m_lastDetected) {
-				yawAverager.Clear();
-			}
-
-			m_lastDetected = detected.GetBoolean(false);
-
-			double speed = 0.0;
-
-			double yawAverage = yawAverager.Process(yawValue);
-
-			if (yawAverage > -10 && yawAverage < 10) {
-				speed = (1.0 - std::abs(yawAverage / 10.0)) * 0.2;
-			}
-
-			frc::SmartDashboard::PutNumber("Average Yaw", yawAverage);
-
-			// TODO: Add gradual ramp-up
-			Robot::m_driveTrain->drive(yawAverage / 60.0 + speed, -yawAverage / 60.0 + speed);
-		}
+	/* --- TODO: Determine distance --- */
+	if (Robot::m_sonarMax->getDistance() < 10.0) {
+		turningSpeed = 0.0;
+		forwardSpeed = 0.0;
 	}
+
+	Robot::m_driveTrain->drive(forwardSpeed + turningSpeed, forwardSpeed - turningSpeed);
 }
 
 bool ApproachTape::IsFinished() {
@@ -84,4 +52,20 @@ void ApproachTape::End() {
 
 void ApproachTape::Interrupted() {
     End();
+}
+
+std::pair< double, bool > ApproachTape::getTargetYaw() {
+	auto ntinstance = nt::NetworkTableInstance::GetDefault();
+	auto table = ntinstance.GetTable("ChickenVision");
+
+	nt::NetworkTableEntry detected = table->GetEntry("tapeDetected");
+	nt::NetworkTableEntry yaw = table->GetEntry("tapeYaw");
+
+	frc::SmartDashboard::PutNumber("Tape Contours", table->GetEntry("tapeContours").GetDouble(0.0));
+
+	if (!detected.GetBoolean(false)) {
+		return { 0.0, false };
+	}
+
+	return { yaw.GetDouble(0.0), true };
 }

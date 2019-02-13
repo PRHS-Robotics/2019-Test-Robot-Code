@@ -1,12 +1,12 @@
 #pragma once
 
 #include <frc/commands/Command.h>
-
 #include <ctre/Phoenix.h>
+#include <tuple>
 
 class ApproachTape : public frc::Command {
 public:
-    ApproachTape(int yawSamples);
+    ApproachTape();
 
     void Initialize() override;
 
@@ -19,7 +19,6 @@ public:
     void Interrupted() override;
 
 private:
-	bool m_lastDetected = false;
-    const int m_yawSamples;
-    MovingAverage m_yawAverager;
+    std::pair< double, bool > getTargetYaw();
+
 };
