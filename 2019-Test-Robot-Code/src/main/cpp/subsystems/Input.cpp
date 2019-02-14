@@ -10,6 +10,30 @@
 #include <cmath>
 #include <frc/buttons/JoystickButton.h>
 
+enum ButtonId {
+	XBOX_A = 1 + MAX_PRIMARY_BUTTONS,
+	XBOX_B,
+	XBOX_X,
+	XBOX_Y,
+	XBOX_LB,
+	XBOX_RB,
+	XBOX_BACK,
+	XBOX_START,
+	XBOX_L,
+	XBOX_R
+};
+
+static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
+		{ "SHIFT_FAST", { "High Speed", 3 }, },
+		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
+		{ "TRIGGER", 	{ "Trigger", 1 } },
+		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
+		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
+		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
+		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
+		{ "FIND_TAPE", { "FIND_TAPE", 10 } }
+};
+
 // Checks SmartDashboard entry, returns true if button map is valid and usable
 static bool isValidMap(std::string buttonId) {
 	// SmartDashboard does not support integral-only values
