@@ -15,7 +15,7 @@ static bool isValidMap(std::string buttonId) {
 	// SmartDashboard does not support integral-only values
 	double temp = frc::SmartDashboard::GetNumber(defaultButtonMap.at(buttonId).first, 0.0);
 
-	if (std::floor(temp) != temp || temp < 1.0 || temp >= MAX_PRIMARY_BUTTONS + 1) {
+	if (std::floor(temp) != temp || temp < 1.0 || temp >= MAX_BUTTONS + 1) {
 		// Fractional, non-positive, and out-of-range values not allowed
 		return false;
 	}
@@ -66,9 +66,12 @@ Input::Input(int primaryPort, int secondaryPort) :
 		}
 	}
 
+	// Arrays start at 0, button numbering starts at 1
 	for (int i = 0; i < MAX_PRIMARY_BUTTONS; ++i) {
-		// Arrays start at 0, button numbering starts at 1
-		buttons.push_back(std::make_unique< frc::JoystickButton >(&primary, i + 1));
+		buttons[i] = std::make_unique< frc::JoystickButton >(&primary, i + 1);
+	}
+	for (int i = 0; i < MAX_SECONDARY_BUTTONS; ++i) {
+		buttons[i + MAX_PRIMARY_BUTTONS] = std::make_unique< frc::JoystickButton >(&secondary, i + 1);
 	}
 }
 
@@ -82,6 +85,9 @@ InputState Input::getRawInput() {
 	};
 	for (std::size_t i = 0; i < MAX_PRIMARY_BUTTONS; ++i) {
 		temp.buttons[i] = primary.GetRawButton(i + 1);
+	}
+	for (std::size_t i = 0; i < MAX_SECONDARY_BUTTONS; ++i) {
+		temp.buttons[i + MAX_PRIMARY_BUTTONS] = secondary.GetRawButton(i + 1);
 	}
 	return temp;
 }

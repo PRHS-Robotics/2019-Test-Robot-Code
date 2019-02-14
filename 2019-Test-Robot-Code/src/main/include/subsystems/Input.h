@@ -15,7 +15,7 @@
 #include <string>
 #include <bitset>
 #include <tuple>
-#include <vector>
+#include <array>
 
 static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
 		{ "SHIFT_FAST", { "High Speed", 3 }, },
@@ -29,11 +29,13 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 };
 
 constexpr const std::size_t MAX_PRIMARY_BUTTONS = 11;
+constexpr const std::size_t MAX_SECONDARY_BUTTONS = 13;
+constexpr const std::size_t MAX_BUTTONS = MAX_PRIMARY_BUTTONS + MAX_SECONDARY_BUTTONS;
 
 // Stores the current state of the joystick & xbox controller axes, buttons, etc.
 struct InputState {
 	double x, y, r, t;
-	std::bitset< MAX_PRIMARY_BUTTONS > buttons;
+	std::bitset< MAX_BUTTONS > buttons;
 };
 
 // Returns the index into InputState::buttons of a given button name
@@ -62,7 +64,7 @@ public:
 
 private:
 
-	std::vector< std::unique_ptr< frc::Button > > buttons;
+	std::array< std::unique_ptr< frc::Button >, MAX_BUTTONS > buttons;
 
 	frc::Joystick primary;
 	frc::XboxController secondary;
