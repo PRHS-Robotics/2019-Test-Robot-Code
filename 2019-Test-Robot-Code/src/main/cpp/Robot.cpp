@@ -38,7 +38,7 @@ std::unique_ptr< frc::SerialPort > Robot::m_serialPort{};
 std::unique_ptr< frc::AnalogInput > Robot::m_analogInput{};
 std::unique_ptr< frc::Compressor > Robot::m_compressor{};
 std::unique_ptr< frc::DigitalOutput > Robot::m_lights{};
-std::unique_ptr< std::thread > Robot::m_calculation{};
+//std::unique_ptr< std::thread > Robot::m_calculation{};
 std::unique_ptr< ManualControl > Robot::m_manualControl{};
 std::unique_ptr< ApproachCargo > Robot::m_approachCargo{};
 std::unique_ptr< ApproachTape > Robot::m_approachTape{};
@@ -114,8 +114,12 @@ void Robot::RobotInit() {
 	m_speedTest = std::make_unique< SpeedTest >(Robot::m_input.get());
 
 	m_lights = std::make_unique< frc::DigitalOutput >(0);
+	m_lights->EnablePWM(0.0);
+	m_lights->SetPWMRate(1000.0);
 
-	m_calculation = std::make_unique< std::thread >(f, waypoints);
+	//m_calculation = std::make_unique< std::thread >(f, waypoints);
+
+	//m_calculation = std::make_unique< std::a
 
 	frc::SmartDashboard::init();
 
@@ -149,7 +153,8 @@ void Robot::AutonomousInit() {
 	// m_autoSelected = SmartDashboard::GetString(
 	// 		"Auto Selector", kAutoNameDefault);
 	std::cout << "Auto selected: " << m_autoSelected << std::endl;
-		
+	
+
 	if (!m_followPath) {
 		std::cout << "Making FollowPath command\n";
 		m_followPath = std::make_unique< FollowPath >(pathresult.first, pathresult.second);
@@ -182,7 +187,6 @@ void Robot::TeleopInit() {
 	m_driveTrain->resetSensors();
 
 	std::cout << "Doing handshake\n";
-	m_calculation->join();
 
 	Robot::m_manualControl->Start();
 

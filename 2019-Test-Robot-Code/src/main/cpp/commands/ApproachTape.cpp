@@ -16,7 +16,7 @@ ApproachTape::ApproachTape() :
 }
 
 void ApproachTape::Initialize() {
-	Robot::m_lights->Set(true);
+	Robot::m_lights->UpdateDutyCycle(0.2);
 
 	auto ntinstance = nt::NetworkTableInstance::GetDefault();
 	auto table = ntinstance.GetTable("ChickenVision");
@@ -47,7 +47,7 @@ bool ApproachTape::IsFinished() {
 
 void ApproachTape::End() {
     Robot::m_driveTrain->drive(0.0, 0.0);
-	Robot::m_lights->Set(false);
+	Robot::m_lights->UpdateDutyCycle(0.0);
 }
 
 void ApproachTape::Interrupted() {

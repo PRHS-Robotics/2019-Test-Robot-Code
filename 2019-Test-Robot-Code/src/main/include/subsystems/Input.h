@@ -28,11 +28,11 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "FIND_TAPE", { "FIND_TAPE", 10 }}
 };
 
-constexpr const std::size_t MAX_BUTTONS = 11;
+constexpr const std::size_t MAX_PRIMARY_BUTTONS = 11;
 
 struct InputState {
 	double x, y, r, t;
-	std::bitset< MAX_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
+	std::bitset< MAX_PRIMARY_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
 };
 
 std::size_t buttonIndex(const std::string& buttonId);
