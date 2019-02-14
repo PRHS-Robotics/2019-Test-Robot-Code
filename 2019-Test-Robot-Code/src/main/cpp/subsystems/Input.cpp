@@ -39,7 +39,7 @@ bool buttonValue(InputState input, const std::string& buttonId) {
 		return false;
 	}
 	else {
-		return input.buttons[index];
+		return input.buttons[index - 1];
 	}
 }
 
@@ -81,7 +81,7 @@ InputState Input::getRawInput() {
 		0
 	};
 	for (std::size_t i = 0; i < MAX_PRIMARY_BUTTONS; ++i) {
-		temp.buttons[i + 1] = primary.GetRawButton(i + 1);
+		temp.buttons[i] = primary.GetRawButton(i + 1);
 	}
 	return temp;
 }

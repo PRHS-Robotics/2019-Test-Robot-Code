@@ -25,22 +25,25 @@ static const std::unordered_map< std::string, std::pair< std::string, int > > de
 		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
 		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
 		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
-		{ "FIND_TAPE", { "FIND_TAPE", 10 }}
+		{ "FIND_TAPE", { "FIND_TAPE", 10 } }
 };
 
 constexpr const std::size_t MAX_PRIMARY_BUTTONS = 11;
 
+// Stores the current state of the joystick & xbox controller axes, buttons, etc.
 struct InputState {
 	double x, y, r, t;
-	std::bitset< MAX_PRIMARY_BUTTONS + 1 > buttons; // FRC button numbering starts at 1
+	std::bitset< MAX_PRIMARY_BUTTONS > buttons;
 };
 
+// Returns the index into InputState::buttons of a given button name
 std::size_t buttonIndex(const std::string& buttonId);
 
 // Returns true if button mapped to code input 'buttonId' (e.g. 'SHIFT_FAST') is pressed
 // Returns false if button map is invalid
 bool buttonValue(InputState input, const std::string& buttonId);
 
+// Applies deadzone correction to a raw input value
 double applyDeadzone(double value, double deadzoneRange);
 
 class Input {
@@ -48,10 +51,13 @@ public:
 
 	Input(int primaryPort, int secondaryPort);
 
+	// Returns unmodified, actual input state
 	InputState getRawInput();
 
+	// Returns input state with deadzone correction applied
 	InputState getInput();
 
+	// Returns the WPILib button handle for a given button name
 	frc::Button *getButton(const std::string& name);
 
 private:
