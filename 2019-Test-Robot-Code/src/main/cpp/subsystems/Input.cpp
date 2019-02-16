@@ -11,6 +11,7 @@
 #include <frc/buttons/JoystickButton.h>
 
 enum ButtonId {
+	// declaration for xbox controller components
 	XBOX_A = 1 + MAX_PRIMARY_BUTTONS,
 	XBOX_B,
 	XBOX_X,
@@ -23,15 +24,16 @@ enum ButtonId {
 	XBOX_R
 };
 
+
 static const std::unordered_map< std::string, std::pair< std::string, int > > defaultButtonMap = {
-		{ "SHIFT_FAST", { "High Speed", 3 }, },
-		{ "SHIFT_SLOW", { "Low Speed", 5 }, },
-		{ "TRIGGER", 	{ "Trigger", 1 } },
-		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } },
-		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } },
+		{ "SHIFT_FAST", { "High Speed", 3 }, }, //high speed shift bound to button 3
+		{ "SHIFT_SLOW", { "Low Speed", 5 }, }, // low speed shift bound to button 5
+		{ "TRIGGER", 	{ "Trigger", 1 } }, //speed test(runs robot at constant speed) bound to button 1
+		{ "DEBUG_BUTTON", { "DO NOT TOUCH", 2 } }, 
+		{ "SEARCH_AND_DESTROY", { "Search and Destroy", 7 } }, //activates approach cargo when 7 is pressed
 		{ "DEBUG_BUTTON_2", { "DO NOT TOUCH 2", 8 } },
 		{ "MANUAL_OVERRIDE", { "Manual Override", 9 } },
-		{ "FIND_TAPE", { "FIND_TAPE", 10 } }
+		{ "FIND_TAPE", { "FIND_TAPE", 10 } } // activates approach tape when button 10 pressed
 };
 
 // Checks SmartDashboard entry, returns true if button map is valid and usable
@@ -98,7 +100,7 @@ Input::Input(int primaryPort, int secondaryPort) :
 		buttons[i + MAX_PRIMARY_BUTTONS] = std::make_unique< frc::JoystickButton >(&secondary, i + 1);
 	}
 }
-
+//input from controller stick directions
 InputState Input::getRawInput() {
 	InputState temp = {
 		primary.GetX(),
