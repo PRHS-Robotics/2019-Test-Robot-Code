@@ -10,7 +10,7 @@ ManualControl::ManualControl(Input *input) :
 }
 
 void ManualControl::Execute() {
-    Robot::m_driveTrain->drive(m_input->getInput());
+    Robot::m_driveTrain->drive(m_input->getInput()); //recieves driver input to control robot 
 }
 
 bool ManualControl::IsFinished() {
@@ -18,7 +18,7 @@ bool ManualControl::IsFinished() {
 }
 
 void ManualControl::End() {
-    Robot::m_driveTrain->drive(0.0, 0.0);
+    Robot::m_driveTrain->drive(0.0, 0.0); //sets speed of robot to zero
 }
 
 void ManualControl::Interrupted() {

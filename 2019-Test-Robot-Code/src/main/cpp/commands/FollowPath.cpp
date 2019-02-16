@@ -6,7 +6,7 @@
 
 FollowPath::FollowPath(std::vector< Segment > leftData, std::vector< Segment > rightData) :
     m_lFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
-    m_rFollower(EncoderFollower{ 0, 0, 0, 0, 0 }),
+    m_rFollower(EncoderFollower{ 0, 0, 0, 0, 0 }), 
     m_config(EncoderConfig{ 0, 4096, 0.314159265/* ish */,  0.01, 0 , 0.0, 1.0 / 1.5, 0.0 }),
     m_leftData(leftData),
     m_rightData(rightData),
